@@ -1,0 +1,11 @@
+(library
+ (name lib)
+ (modules lib)
+ (preprocess
+  (pps ppx_jane bisect_ppx))
+ (libraries core))
+
+; (executable
+;  (name ngrams)
+;  (modules ngrams)
+;  (libraries lib core))
