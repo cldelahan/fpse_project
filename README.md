@@ -1,3 +1,3 @@
 # FPSE Final Project
 
-Conner and Vini
+Project structure inspired by the FbDK distribution from Prof. Smith's Principles of Programming Languages class.
