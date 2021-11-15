@@ -24,6 +24,8 @@ module Ast: sig
 
     | Extend of expr * expr (* expr * expr should evaluate to NodeList * NodeList *)
 
+    | Load of string
+
   val show_expr: expr -> string
   val pp_expr: Format.formatter -> expr -> unit
     [@@ocaml.toplevel_printer]
