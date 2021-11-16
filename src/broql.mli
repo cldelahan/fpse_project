@@ -50,6 +50,74 @@ module Interpreter: sig
   val eval: Ast.expr -> Ast.expr
 end
 
+(* Nodes in the graph*)
+module Node: sig
+  (* The identifier for the node *)
+  val ident: string
+  (* The json data for the node*)
+  type t
+  (* JSON Key Values *)
+  val attributes: t
+  (* Get the attribute from a node*)
+  val get_attr: t -> t option
+end
+
+(* Collection of nodes in a relation *)
+module Relation_directed: sig
+  (* The identifier for the relation *)
+  val ident: string
+  (* Who did the relation to what list of Nodes *)
+  val actions: Node Map.t
+end
+
+(* Collection of nodes in a non-directed relation *)
+module Relation_nondirected: sig
+  (* The identifier for the relation *)
+  val ident: string
+  (* All nodes participating in relation *)
+  val participants: Node list
+end
+
+
+(* The underlying graph structure for the Database*)
+module Graph: sig
+  (* List of nodes *)
+  val nodes: Node list
+  (* List of relations *)
+  val relations_directed: Relation_directed list
+  (* List of relations *)
+  val relations_nondirected: Relation_nondirected list
+
+  (* Create node *)
+  val add_node: string -> string -> Node
+  (* Create relation *)
+  val add_relation: string -> Node list -> Relation
+
+  (* Get edges from node *)
+  val get_edges: Node -> Relation list
+  (* Get neighbors from node *)
+  val get_neighbors: Node -> Node list
+  (* Get all neighbors using the relation *)
+  val get_relation_neighbors: Node -> Relation -> Node list
+end
+
+module DB (module Graph): sig
+  module Graph = Graph
+  (* Graph that stores data*)
+  val g: Graph
+  (* Type of the operation *)
+  type operation
+  (* Type of the response *)
+  type response
+
+  (* IO for the database *)
+  val load: string -> Graph;
+  val write: string -> ();
+
+  (* Perform an operation on the graph*)
+  val act: operation -> response
+
+
 (* module Options: sig
   val options: (Arg.key * Arg.spec * Arg.doc) list
 end
