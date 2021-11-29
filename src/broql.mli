@@ -122,6 +122,7 @@ module DB (module Graph): sig
 
   (* Perform an operation on the graph*)
   val act: operation -> response
+end
 
 
 (* module Options: sig
