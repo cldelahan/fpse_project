@@ -59,11 +59,11 @@ end
 (* Nodes in the graph*)
 module Node: sig
   (* The identifier for the node *)
-  val ident: string
+  val id: string
   (* The json data for the node*)
   type t
   (* JSON Key Values *)
-  val attributes: t
+  val attributes: Core.Map
   (* Get the attribute from a node*)
   val get_attr: t -> t option
 end
