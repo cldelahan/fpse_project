@@ -3,8 +3,8 @@
   Author: Conner Delahanty
   Date: 12/1/21
 *)
-[@@@ocaml.warning "-33"]
-[@@@ocaml.warning "-6"]
+(* [@@@ocaml.warning "-33"] *)
+
 open Core
 
 module String_Map = Map.Make(String)
@@ -13,7 +13,7 @@ module Node = struct
   type t = (String.t) String_Map.t
   let empty = String_Map.empty
   let add_attr (a: t) (k: string) (v: string) =
-    String_Map.add_exn a k v 
+    String_Map.add_exn a ~key:k ~data:v 
   let get_attr (a: t) (k: string) : string option = 
     String_Map.find a k
 end
@@ -41,11 +41,11 @@ module Database = struct
   type t = {relations: r; nodes: n}
   let empty = {relations = String_Map.empty; nodes = String_Map.empty}
   let add_node (db: t) (id: string) (node: Node.t) = 
-    let new_nodes = String_Map.add_exn db.nodes id node in
+    let new_nodes = String_Map.add_exn db.nodes ~key:id ~data:node in
     {relations = db.relations; nodes = new_nodes}
 
   let add_relation (db: t) (id: string) (relation: Relation.t) = 
-    let new_relations = String_Map.add_exn db.relations id relation in
+    let new_relations = String_Map.add_exn db.relations ~key:id ~data:relation in
     {relations = new_relations; nodes = db.nodes}
 end
 
