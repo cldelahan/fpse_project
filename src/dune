@@ -3,9 +3,9 @@
  (modules graph)
  (preprocess
   (pps ppx_jane bisect_ppx))
- (libraries core))
+ (libraries core yojson))
 
 (executable
  (name main)
  (modules main)
- (libraries graph core))
+ (libraries graph core yojson))
