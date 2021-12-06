@@ -19,8 +19,7 @@
 %token EOEX
 
 %token <string> STRING
-%token <string> RELATION_NAME
-%token <string> NODE_NAME
+%token <string> IDENT
 
 %start <Broql_ast.expr> main
 
