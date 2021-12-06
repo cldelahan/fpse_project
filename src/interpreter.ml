@@ -18,7 +18,7 @@ let toplevel_loop () =
   (* Interpret and print. Exceptions are caught and reported. But the toploop is not aborted *)
   let safe_interpret_and_print ast =
     try
-      let result = Interpreter.eval ast in
+      let result = Eval.eval ast in
       Format.printf "==> %a\n" Pp.pp_expr result
     with ex ->
       print_exception ex

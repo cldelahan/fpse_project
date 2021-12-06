@@ -7,8 +7,8 @@ let lowercase = ['a'-'z' '\223'-'\246' '\248'-'\255' '_']
 let identchar =
   ['A'-'Z' 'a'-'z' '_' '\192'-'\214' '\216'-'\246' '\248'-'\255' '\'' '0'-'9']
 
-let object = '{' .* '}'
-let file = .+ ".broql" 
+let object = '{' _* '}'
+let file = _+ ".broql" 
 
 rule token = parse
 | blank+                { token lexbuf }

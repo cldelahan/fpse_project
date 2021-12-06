@@ -10,7 +10,7 @@
  (wrapped false)
  (preprocess
   (pps ppx_deriving.show))
- (modules broql_lexer broql_parser broql_ast pp)
+ (modules broql_lexer broql_parser broql_ast pp eval)
  (libraries graph))
 
 (ocamllex
