@@ -24,3 +24,15 @@ Implemented for code checkpoint:
 4. Test suite for parsing
 - Simple tests, at this stage just for the lexing part of the process
 - Found in `tests-parsing/parsing_tests.ml`
+
+5. Database Structure
+- Created the underlying graphical structure of the database, which is a set of nodes, contained in edges, which participate in relations. 
+- Database supports serialization, and thus has the ability to read and load to a file using `save` and `load`.
+
+6. Broql Wrapper
+- Interface for parser to run commands against, using the Broql module that wraps the underlying database
+- Has a one-to-one correspondance with the Broqli interpreter.
+
+6. Database test suite
+- Simple tests that test core functionality of the database data structure modules. 
+- Found in `tests/tests.ml` 
