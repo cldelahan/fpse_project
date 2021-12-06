@@ -36,6 +36,7 @@ module Node = struct
   type t = (String.t) String_Map.t
   let empty = String_Map.empty
   (* Add a specific key-value attribute *)
+  (* To-do -- need to check for duplicates *)
   let add_attr (a: t) (k: string) (v: string) =
     String_Map.add_exn a ~key:k ~data:v 
   (* Get a specific attribute by key *)
@@ -62,7 +63,8 @@ module Node = struct
   let to_string (a: t) = 
     let rec acc keys s = 
       match keys with
-      | k :: rest -> acc rest (String.concat [s; " "; k; ": "; String_Map.find_exn a k])
+      | k :: rest ->  if String.(=) s "" then acc rest (String.concat [k; ": "; String_Map.find_exn a k])
+                      else acc rest (String.concat [s;" "; k; ": "; String_Map.find_exn a k])
       | [] -> s in
     acc (String_Map.keys a) ""
 
@@ -88,6 +90,7 @@ module Relation = struct
   (* Map from node id to edge *)
   type t = {id: string; participants: (Edge.t) String_Map.t} [@@deriving sexp]
   let empty = {id =  ""; participants = String_Map.empty}
+  let get_id (a: t) = a.id
 end
 
 module Database = struct
