@@ -12,11 +12,13 @@
 %token SIZE
 %token REC
 %token DIR
+%token LOAD
+%token SAVE
 %token EQUAL
 %token COMMA
 %token EOEX
 
-%token <string> OBJECT
+%token <string> STRING
 %token <string> RELATION_NAME
 %token <string> NODE_NAME
 
@@ -29,12 +31,28 @@ main:
 ;
 
 expr:
-    | NODE NODE_NAME EQUAL OBJECT { CreateNode($2, $4) }
-    | RELATION RELATION_NAME FOR node_list { CreateRelation($2, $4) }
-    | WHO RELATION_NAME FOR NODE_NAME { Who($2, $4) }
-    | SIZE expr { Size($2) }
+    | NODE ident_decl EQUAL STRING { CreateNode($2, $4) }
+    | RELATION ident_decl FOR node_list { CreateRelation($2, $4) }
+    | WHO relation_usage FOR node_usage { Who($2, $4) }
+    | SIZE expr { Size $2 }
+    | LOAD STRING { Load $2 }
+    | SAVE STRING { Save $2 }
+;
+
+node_usage:
+    ident_decl { Node $1 }
+;
+
+relation_usage:
+    ident_decl { Relation $1 }
+;
+
+ident_decl:
+    IDENT { Ident $1 }
 ;
 
 node_list:
-    separated_list(COMMA, NODE_NAME) { $1 }
+    separated_list(COMMA, node_usage) { $1 }
+;
 
+%%
