@@ -41,9 +41,7 @@ let toplevel_loop () =
   while true do
     Format.printf "# ";
     Format.print_flush ();
-    Format.printf "Here 1\n";
     let parse_result = safe_parse () in
-    Format.printf "Here 2\n";
     match parse_result with
       None -> ()
     | Some ast ->
