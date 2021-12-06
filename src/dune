@@ -5,7 +5,23 @@
   (pps ppx_jane bisect_ppx))
  (libraries core))
 
+(library
+ (name broql)
+ (wrapped false)
+ (preprocess
+  (pps ppx_deriving.show))
+ (modules broql_lexer broql_parser broql_ast pp)
+ (libraries graph))
+
+(ocamllex
+ (modules broql_lexer))
+
+(menhir
+ (modules broql_parser))
+
 (executable
- (name main)
- (modules main)
- (libraries graph core))
+ (name interpreter)
+ (modules interpreter)
+ (preprocess
+  (pps ppx_deriving.show))
+ (libraries broql))
