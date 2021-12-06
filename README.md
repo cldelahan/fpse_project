@@ -33,6 +33,6 @@ Implemented for code checkpoint:
 - Interface for parser to run commands against, using the Broql module that wraps the underlying database
 - Has a one-to-one correspondance with the Broqli interpreter.
 
-6. Database test suite
+7. Database test suite
 - Simple tests that test core functionality of the database data structure modules. 
 - Found in `tests/tests.ml` 
