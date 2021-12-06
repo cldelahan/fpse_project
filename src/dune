@@ -3,7 +3,7 @@
  (modules graph)
  (preprocess
   (pps ppx_jane bisect_ppx))
- (libraries core))
+ (libraries core yojson))
 
 (library
  (name broql)
