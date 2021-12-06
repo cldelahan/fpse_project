@@ -12,15 +12,15 @@ let file = _+ ".broql"
 
 rule token = parse
 | blank+                { token lexbuf }
-| "Node"                { NODE }
-| "Relation"            { RELATION }
-| "Who"                 { WHO }
-| "For"                 { FOR }
-| "Size"                { SIZE }
-| "Rec"                 { REC }
-| "Dir"                 { DIR }
-| "Load"                { LOAD }
-| "Save"                { SAVE }
+| "NODE"                { NODE }
+| "RELATION"            { RELATION }
+| "WHO"                 { WHO }
+| "FOR"                 { FOR }
+| "SIZE"                { SIZE }
+| "REC"                 { REC }
+| "DIR"                 { DIR }
+| "LOAD"                { LOAD }
+| "SAVE"                { SAVE }
 | "="                   { EQUAL }
 | ","                   { COMMA }
 | ";"                   { EOEX }
