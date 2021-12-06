@@ -1,0 +1,1 @@
+((n_queries 0)(db((relations())(nodes((N1((age 22)(name Conner)))(N2((age 22)(name Vini)))))))(out_path db.broql))

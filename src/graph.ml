@@ -66,11 +66,17 @@ module Node = struct
       | [] -> s in
     acc (String_Map.keys a) ""
 
+  let sexp_of_t (a: t) = 
+    String_Map.sexp_of_t String.sexp_of_t a
+
+  let t_of_sexp (sexp: Sexp.t) = 
+    String_Map.t_of_sexp String.t_of_sexp sexp
+
 end
 
 
 module Edge = struct
-  type t = {id: string; node_ids: string list}
+  type t = {id: string; node_ids: string list} [@@deriving sexp]
   let empty = {id = ""; node_ids = []}
   let get_id (a: t) = a.id
   let get_nodes (a: t) = a.node_ids
@@ -80,15 +86,13 @@ end
 
 module Relation = struct
   (* Map from node id to edge *)
-  type e = (Edge.t) String_Map.t
-  type t = {id: string; participants: e}
+  type t = {id: string; participants: (Edge.t) String_Map.t} [@@deriving sexp]
   let empty = {id =  ""; participants = String_Map.empty}
 end
 
 module Database = struct
-  type n = (Node.t) String_Map.t
-  type r = (Relation.t) String_Map.t
-  type t = {relations: r; nodes: n}
+  type t = {relations: (Relation.t) String_Map.t; 
+            nodes: (Node.t) String_Map.t} [@@deriving sexp]
   let empty = {relations = String_Map.empty; nodes = String_Map.empty}
   let add_node (db: t) (id: string) (node: Node.t) = 
     let new_nodes = String_Map.add_exn db.nodes ~key:id ~data:node in
@@ -109,7 +113,7 @@ module Broql = struct
   (* TODO: Figure out best way to interact *)
   type t = {mutable n_queries: int; 
             mutable db: Database.t; 
-            mutable out_path: string}
+            mutable out_path: string} [@@deriving sexp]
     
   let empty = {n_queries = 0; db = Database.empty; out_path = "db.broql"}
   let do_query (a: t) = a.n_queries <- a.n_queries + 1
@@ -126,6 +130,22 @@ module Broql = struct
       | (Some (n), Some (attr_name)) -> Node.get_attr n attr_name
       | (Some (n), None) -> Some(Node.to_string n)
       | (None, _) -> None
+
+  let save (a: t) (path: string) = 
+    let str = Sexp.to_string (sexp_of_t a) in
+      let oc = Out_channel.create path in
+        Printf.fprintf oc "%s\n" str;
+        Out_channel.close oc
+
+  let load (path: string) = 
+    let ic = In_channel.create path in
+    try
+      match In_channel.input_line ic with 
+      | None -> In_channel.close ic; empty
+      | Some (str) -> In_channel.close ic; let sexp = Sexp.of_string str in
+                      t_of_sexp sexp
+    with _ -> 
+      empty
 
   (* Put broql operations here *)
 end
