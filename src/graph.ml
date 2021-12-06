@@ -80,6 +80,8 @@ end
 module Edge = struct
   type t = {id: string; node_ids: string list} [@@deriving sexp]
   let empty = {id = ""; node_ids = []}
+  let create (i: string) (ns: string list) = 
+    {id=i; node_ids=ns}
   let get_id (a: t) = a.id
   let get_nodes (a: t) = a.node_ids
   let set_nodes (a: t) (nodes: string list) = 
