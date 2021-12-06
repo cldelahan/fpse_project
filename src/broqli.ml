@@ -1,3 +1,16 @@
+let broqli_text_art = "
+/$$$$$$$  /$$$$$$$   /$$$$$$   /$$$$$$  /$$       /$$$$$$
+| $$__  $$| $$__  $$ /$$__  $$ /$$__  $$| $$      |_  $$_/
+| $$  \\ $$| $$  \\ $$| $$  \\ $$| $$  \\ $$| $$        | $$  
+| $$$$$$$ | $$$$$$$/| $$  | $$| $$  | $$| $$        | $$  
+| $$__  $$| $$__  $$| $$  | $$| $$  | $$| $$        | $$  
+| $$  \\ $$| $$  \\ $$| $$  | $$| $$/$$ $$| $$        | $$  
+| $$$$$$$/| $$  | $$|  $$$$$$/|  $$$$$$/| $$$$$$$$ /$$$$$$
+|_______/ |__/  |__/ \\______/  \\____ $$$|________/|______/
+                                    \\__/                  
+
+
+"
 
 let toplevel_loop () =
   (* Prints exceptions and associated stack traces *)
@@ -11,7 +24,7 @@ let toplevel_loop () =
   let safe_parse () =
     try
       let lexbuf = Lexing.from_channel stdin in
-      Some ( Broql_parser.main Broql_lexer.token lexbuf )
+      Some ( Parser.main Lexer.token lexbuf )
     with Exit -> exit 0
        | ex -> print_exception ex; None
   in
@@ -24,10 +37,13 @@ let toplevel_loop () =
       print_exception ex
   in
   Format.print_flush ();
+  Format.printf "%s" broqli_text_art;
   while true do
     Format.printf "# ";
     Format.print_flush ();
+    Format.printf "Here 1\n";
     let parse_result = safe_parse () in
+    Format.printf "Here 2\n";
     match parse_result with
       None -> ()
     | Some ast ->

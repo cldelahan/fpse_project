@@ -1,11 +1,11 @@
 open Core;;
 open OUnit2;;
-open Broql_parser;;
+open Parser;;
 
 (* Helper function to extract all tokens from lexbuf *)
 let list_of_lexbuf (lexbuf: Lexing.lexbuf): token list =
   let rec helper lexbuf cur_list =
-    match Broql_lexer.token lexbuf with
+    match Lexer.token lexbuf with
     | EOEX as t -> t :: cur_list
     | _ as t -> helper lexbuf (t :: cur_list)
   in List.rev @@ helper lexbuf []

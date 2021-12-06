@@ -1,5 +1,5 @@
 {
-    open Broql_parser;;
+    open Parser;;
 }
 
 let blank = [' ' '\t' '\n' '\r']
