@@ -1,5 +1,5 @@
 %{
-    open Broql_ast;;
+    open Ast;;
 %}
 
 /*
@@ -21,7 +21,7 @@
 %token <string> STRING
 %token <string> IDENT
 
-%start <Broql_ast.expr> main
+%start <Ast.expr> main
 
 %%
 

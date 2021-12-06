@@ -2,7 +2,7 @@ let eval = Eval.eval
 
 let parse s =
   let lexbuf = Lexing.from_string (s^";") in
-  Broql_parser.main Broql_lexer.token lexbuf
+  Parser.main Lexer.token lexbuf
 
 let unparse e =
   Format.asprintf "%a" Pp.pp_expr e

@@ -10,18 +10,18 @@
  (wrapped false)
  (preprocess
   (pps ppx_deriving.show))
- (modules broql_lexer broql_parser broql_ast pp eval debugutils)
+ (modules lexer parser ast pp eval debugutils)
  (libraries graph))
 
 (ocamllex
- (modules broql_lexer))
+ (modules lexer))
 
 (menhir
- (modules broql_parser))
+ (modules parser))
 
 (executable
- (name interpreter)
- (modules interpreter)
+ (name broqli)
+ (modules broqli)
  (preprocess
   (pps ppx_deriving.show))
  (libraries broql))
