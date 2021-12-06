@@ -25,3 +25,8 @@
  (preprocess
   (pps ppx_deriving.show))
  (libraries broql))
+
+(executable
+ (name main)
+ (modules main)
+ (libraries core graph yojson))
