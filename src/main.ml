@@ -15,7 +15,7 @@ let () =
   Broql.save instance "./db.broql"
   *)
   let instance = Broql.load "./db.broql" in
-  let att = Broql.get_attr instance ~name:"name" "N1" in
+  let att = Broql.get_attr instance ~name:"name" "N3" in
   match att with
   | None -> Printf.printf "%s\n" "No attribute found"
   | Some (str) -> Printf.printf "%s\n" str
