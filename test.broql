@@ -1,0 +1,1 @@
+((n_queries 0)(db((relations((dislikes((id"")(participants((n1(((id dislikes)(node_ids(n1 n2))(is_dir true))))(n2(((id dislikes)(node_ids(n1 n2))(is_dir true))))))))(friends((id"")(participants((n1(((id friends)(node_ids(n1 n2))(is_dir false))))(n2(((id friends)(node_ids(n1 n2))(is_dir false))))))))))(nodes((n1((name Vini)))(n2((name Conner)))))))(out_path db.broql))

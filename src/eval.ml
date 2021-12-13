@@ -25,8 +25,6 @@ let rec eval (exp: expr) : expr =
         | _ -> failwith "Incorrect usage"
       ) in
       let node_identifier_list = List.map l ~f in
-      let _ = node_identifier_list in
-      let _ = relation_name in
       Broql.add_relation !instance relation_name node_identifier_list is_dir;
       Relation i
     )
