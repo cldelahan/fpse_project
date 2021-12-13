@@ -36,7 +36,7 @@ let rec eval (exp: expr) : expr =
       | Node i -> (match i with Ident node_name ->
         match Broql.get_attr !instance node_name ~name:attribute with
         | Some attr_val -> Msg attr_val
-        | None -> raise (Exception "Missing attribute")
+        | None -> raise @@ Exception "Missing attribute"
         )
       | _ -> failwith "Incorrect usage"
     )

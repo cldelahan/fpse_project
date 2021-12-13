@@ -12,12 +12,12 @@ let broqli_text_art = "
 
 "
 
-let toplevel_loop () =
+let toplevel_loop verbose =
   (* Prints exceptions and associated stack traces *)
   let print_exception ex =
     Format.printf "Exception: %s\n" (Printexc.to_string ex);
     Format.print_flush ();
-    Printexc.print_backtrace stdout;
+    if verbose then Printexc.print_backtrace stdout else ();
     flush stdout
   in 
   (* Parse stdin *)
@@ -34,7 +34,6 @@ let toplevel_loop () =
       let result = Eval.eval ast in
       Format.printf "==> %a\n" Pp.pp_expr result
     with ex ->
-      Format.printf "HERE\n";
       print_exception ex
   in
   Format.print_flush ();
@@ -60,5 +59,16 @@ let toplevel_loop () =
    Format.print_flush () *)
 
 
+let main () = 
+  let verbose = ref false in
+  Arg.parse
+    ([("--verbose",
+       Arg.Set verbose,
+       "Output debug information")
+     ])
+    (fun _ -> ())
+    ("Usage: broqli.exe [--verbose]");
+  toplevel_loop !verbose
+
 let () = 
-  toplevel_loop ()
+  main ()
