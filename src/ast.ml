@@ -19,7 +19,7 @@ type expr =
 
   | Who of expr * expr (* expr * expr should evaluate to Relation * Node *)
 
-  | Size of expr (* expr should evaluate to NodeList *)
+  | Size of expr list (* expr list should evaluate to Node list *)
 
   (* | Extend of expr * expr (* expr * expr should evaluate to NodeList * NodeList *) *)
 
