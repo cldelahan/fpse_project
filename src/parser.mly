@@ -14,6 +14,7 @@
 %token DIR
 %token LOAD
 %token SAVE
+%token ATTR
 %token EQUAL
 %token COMMA
 %token EOEX
@@ -31,8 +32,10 @@ main:
 
 expr:
     | NODE ident_decl EQUAL STRING { CreateNode($2, $4) }
-    | RELATION ident_decl FOR node_list { CreateRelation($2, $4) }
+    | RELATION ident_decl FOR node_list { CreateRelation($2, $4, false) }
+    | RELATION ident_decl DIR FOR node_list { CreateRelation($2, $5, true) }
     | WHO relation_usage FOR node_usage { Who($2, $4) }
+    | ATTR ident_decl node_usage { Attr($2, $3) }
     | SIZE node_list { Size $2 }
     | LOAD STRING { Load $2 }
     | SAVE STRING { Save $2 }

@@ -6,14 +6,13 @@ type expr =
   | Node of ident
   | Relation of ident
   | Object of string (* JSON formatted *)
-  (* | NodeList of expr list (* expr list should evaluate to Node list *) *)
+  | NodeList of expr list
 
   (* Creating nodes and relations *)
   | CreateNode of ident * string (* string is JSON formatted *)
-  | CreateRelation of ident * (expr list) (* expr list should evaluate to Node list *)
-  (* | CreateRelationDir of ident * expr * expr (* expr * expr should evaluate to Node * NodeList *) *)
+  | CreateRelation of ident * (expr list) * bool (* expr list should evaluate to Node list *)
 
-  (* | Attr of ident * expr (* expr should evaluate to Node *) *)
+  | Attr of ident * expr (* expr should evaluate to Node *)
 
   (* | Search of expr (* expr should evaluate to Object *) *)
 
