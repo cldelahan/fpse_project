@@ -18,7 +18,7 @@ let rec eval (exp: expr) : expr =
       Broql.add_node !instance node_name ~json;
       Node i
     )
-  | CreateRelation (i, l) -> (match i with Ident relation_name ->
+  | CreateRelation (i, l, is_dir) -> (match i with Ident relation_name ->
       let f n = (
         match eval n with
         | Node (Ident i) -> i
@@ -27,7 +27,7 @@ let rec eval (exp: expr) : expr =
       let node_identifier_list = List.map l ~f in
       let _ = node_identifier_list in
       let _ = relation_name in
-      (* Broql.add_relation !instance relation_name node_identifier_list; *)
+      Broql.add_relation !instance relation_name node_identifier_list is_dir;
       Relation i
     )
 

@@ -10,8 +10,7 @@ type expr =
 
   (* Creating nodes and relations *)
   | CreateNode of ident * string (* string is JSON formatted *)
-  | CreateRelation of ident * (expr list) (* expr list should evaluate to Node list *)
-  (* | CreateRelationDir of ident * expr * expr (* expr * expr should evaluate to Node * NodeList *) *)
+  | CreateRelation of ident * (expr list) * bool (* expr list should evaluate to Node list *)
 
   | Attr of ident * expr (* expr should evaluate to Node *)
 
