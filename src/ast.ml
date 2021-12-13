@@ -2,6 +2,7 @@ type ident = Ident of string [@@deriving show { with_path = false }]
 
 type expr =
   (* basic and literal *)
+  | Msg of string (* to return messages *)
   | Node of ident
   | Relation of ident
   | Object of string (* JSON formatted *)
