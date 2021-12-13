@@ -34,6 +34,7 @@ let toplevel_loop () =
       let result = Eval.eval ast in
       Format.printf "==> %a\n" Pp.pp_expr result
     with ex ->
+      Format.printf "HERE\n";
       print_exception ex
   in
   Format.print_flush ();

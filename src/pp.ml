@@ -18,6 +18,7 @@ let rec pp_expr fmt =
   | CreateNode (Ident x, s) -> ff fmt "NODE %s = %s" x s
   | CreateRelation (Ident x, l) -> ff fmt "RELATION %s FOR %a" x pp_expr_list l
 
+  | Attr (Ident x, e) -> ff fmt "ATTR %s %a" x pp_expr e
   | Who (e1, e2) -> ff fmt "WHO %a FOR %a" pp_expr e1 pp_expr e2
   | Size l -> ff fmt "SIZE %a" pp_expr_list l
 

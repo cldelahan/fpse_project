@@ -13,7 +13,7 @@ type expr =
   | CreateRelation of ident * (expr list) (* expr list should evaluate to Node list *)
   (* | CreateRelationDir of ident * expr * expr (* expr * expr should evaluate to Node * NodeList *) *)
 
-  (* | Attr of ident * expr (* expr should evaluate to Node *) *)
+  | Attr of ident * expr (* expr should evaluate to Node *)
 
   (* | Search of expr (* expr should evaluate to Object *) *)
 

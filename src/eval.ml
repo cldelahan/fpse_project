@@ -2,6 +2,9 @@ open Core;;
 open Ast;;
 open Graph;;
 
+
+exception Exception of string
+
 let instance = ref Broql.empty
 
 let rec eval (exp: expr) : expr = 
@@ -28,6 +31,15 @@ let rec eval (exp: expr) : expr =
       Relation i
     )
 
+  | Attr (Ident attribute, e) -> (
+      match e with
+      | Node i -> (match i with Ident node_name ->
+        match Broql.get_attr !instance node_name ~name:attribute with
+        | Some attr_val -> Msg attr_val
+        | None -> raise (Exception "Missing attribute")
+        )
+      | _ -> failwith "Incorrect usage"
+    )
   | Who (e1, e2) -> (match (eval e1, eval e2) with
       | (Relation rel_ident, Node node_ident) -> let _ = rel_ident in let _ = node_ident in failwith "TODO"
       | _ -> failwith "Incorrect usage"

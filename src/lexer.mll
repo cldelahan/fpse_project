@@ -21,6 +21,7 @@ rule token = parse
 | "DIR"                 { DIR }
 | "LOAD"                { LOAD }
 | "SAVE"                { SAVE }
+| "ATTR"                { ATTR }
 | "="                   { EQUAL }
 | ","                   { COMMA }
 | ";"                   { EOEX }
