@@ -1,5 +1,15 @@
 let eval = Eval.eval
 
+let lex s =
+  let list_of_lexbuf (lexbuf: Lexing.lexbuf): Parser.token list =
+    let rec helper lexbuf cur_list =
+      match Lexer.token lexbuf with
+      | EOEX as t -> t :: cur_list
+      | _ as t -> helper lexbuf (t :: cur_list)
+    in List.rev @@ helper lexbuf []
+  in let lexbuf = Lexing.from_string (s^";") in
+  list_of_lexbuf lexbuf
+
 let parse s =
   let lexbuf = Lexing.from_string (s^";") in
   Parser.main Lexer.token lexbuf
