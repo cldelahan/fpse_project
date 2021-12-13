@@ -33,7 +33,7 @@ expr:
     | NODE ident_decl EQUAL STRING { CreateNode($2, $4) }
     | RELATION ident_decl FOR node_list { CreateRelation($2, $4) }
     | WHO relation_usage FOR node_usage { Who($2, $4) }
-    | SIZE expr { Size $2 }
+    | SIZE node_list { Size $2 }
     | LOAD STRING { Load $2 }
     | SAVE STRING { Save $2 }
 ;

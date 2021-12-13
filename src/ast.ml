@@ -2,6 +2,7 @@ type ident = Ident of string [@@deriving show { with_path = false }]
 
 type expr =
   (* basic and literal *)
+  | Msg of string (* to return messages *)
   | Node of ident
   | Relation of ident
   | Object of string (* JSON formatted *)
@@ -18,7 +19,7 @@ type expr =
 
   | Who of expr * expr (* expr * expr should evaluate to Relation * Node *)
 
-  | Size of expr (* expr should evaluate to NodeList *)
+  | Size of expr list (* expr list should evaluate to Node list *)
 
   (* | Extend of expr * expr (* expr * expr should evaluate to NodeList * NodeList *) *)
 
