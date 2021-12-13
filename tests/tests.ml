@@ -81,7 +81,12 @@ let test_database_nodes _ =
 
 let test_database_relations _ = 
   assert_equal true @@ (Database.has_relation d3 "friends");;
-  assert_equal false @@ (Database.has_relation d3 "not friends");;
+  assert_equal false @@ (Database.has_relation d3 "not_friends");;
+;;
+
+let test_database_neighbors _ = 
+  assert_equal ["n"] @@ (Database.neighbors d3 "loves" "n2");;
+  assert_equal ["n2"] @@ (Database.neighbors d3 "friends" "n");;
 ;;
 
 
@@ -93,6 +98,7 @@ let database_tests =
   "Database Tests" >: test_list [
     "Test Node IO" >:: test_database_nodes;
     "Test Relation IO" >:: test_database_relations;
+    "Test WHO IO" >:: test_database_neighbors;
   ]
 
 (*
