@@ -61,8 +61,11 @@ let node_tests =
   Database Tests
 *)
 
-let d2 = Database.add_node d "n" n;;
-let d2 = Database.add_node d2 "n2" n2;;
+let d2 = Database.add_node_exn d "n" n;;
+let d2 = Database.add_node_exn d2 "n2" n2;;
+
+let d3 = Database.add_relation d2 "friends" ["n";"n2"] false;;
+let d3 = Database.add_relation d3 "loves" ["n2"; "n"] true;;
 
 let node_equal n1_o n2_o = 
   match (n1_o, n2_o) with
@@ -70,10 +73,15 @@ let node_equal n1_o n2_o =
   | (None, None) -> true
   | (_, _) -> false
 
-let test_database_io _ =
+let test_database_nodes _ =
   assert_equal true @@ (node_equal None (Database.get_node d2 "n3"));;
   assert_equal true @@ (node_equal (Some n) (Database.get_node d2 "n"));;
   assert_equal false @@ (node_equal (Some n2) (Database.get_node d2 "n"));;
+;;
+
+let test_database_relations _ = 
+  assert_equal true @@ (Database.has_relation d3 "friends");;
+  assert_equal false @@ (Database.has_relation d3 "not friends");;
 ;;
 
 
@@ -83,7 +91,8 @@ Broql.add_node i ~json:"{name: \"conner\", id: \"67\"}" "node2";;
 
 let database_tests =
   "Database Tests" >: test_list [
-    "Test IO" >:: test_database_io;
+    "Test Node IO" >:: test_database_nodes;
+    "Test Relation IO" >:: test_database_relations;
   ]
 
 (*
