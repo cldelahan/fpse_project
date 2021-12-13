@@ -13,6 +13,7 @@ let rec eval (exp: expr) : expr =
   | Node _ -> exp
   | Relation _ -> exp
   | Object _ -> exp
+  | NodeList _ -> exp
 
   | CreateNode (i, json) -> (match i with Ident node_name ->
       Broql.add_node !instance node_name ~json;
@@ -39,7 +40,9 @@ let rec eval (exp: expr) : expr =
       | _ -> failwith "Incorrect usage"
     )
   | Who (e1, e2) -> (match (eval e1, eval e2) with
-      | (Relation rel_ident, Node node_ident) -> let _ = rel_ident in let _ = node_ident in failwith "TODO"
+      | (Relation (Ident rel_ident), Node (Ident node_ident)) -> 
+        let nodes = Broql.who !instance rel_ident node_ident in
+        NodeList (List.map nodes ~f:(fun s -> Node (Ident s)))
       | _ -> failwith "Incorrect usage"
     )
   | Size l -> 

@@ -6,6 +6,7 @@ type expr =
   | Node of ident
   | Relation of ident
   | Object of string (* JSON formatted *)
+  | NodeList of expr list
 
   (* Creating nodes and relations *)
   | CreateNode of ident * string (* string is JSON formatted *)
