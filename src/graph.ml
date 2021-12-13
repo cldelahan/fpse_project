@@ -196,6 +196,12 @@ module Broql = struct
       | (Some (n), None) -> Some(Node.to_string n)
       | (None, _) -> None
 
+  let show_nodes (a: t) = 
+    String_Map.keys a.db.nodes
+
+  let show_relations (a: t) = 
+    String_Map.keys a.db.relations
+
   let save (a: t) (path: string) = 
     let str = Sexp.to_string (sexp_of_t a) in
       let oc = Out_channel.create path in
