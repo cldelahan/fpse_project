@@ -42,8 +42,8 @@ expr:
     | CREATE RELATION UNDIR ident_decl { CreateRelation($4, None, false) }
     | CREATE RELATION ident_decl ident_decl { CreateRelation($3, Some $4, true) }
     | RELATION ident_decl FOR node_list { CreateEdge($2, $4) }
-    | WHO relation_usage node_usage { Who($2, $3, 0) }
-    | WHO relation_usage BY node_usage { Who($2, $4, 0) } (* Allow BY as syntactic sugar *)
+    | WHO relation_usage node_usage { Who($2, $3, 1) }
+    | WHO relation_usage BY node_usage { Who($2, $4, 1) } (* Allow BY as syntactic sugar *)
     | WHO relation_usage node_usage REC INT { Who($2, $3, $5) }
     | WHO relation_usage BY node_usage REC INT { Who($2, $4, $6) } (* Allow BY as syntactic sugar *)
     | ATTR ident_decl node_usage { Attr($2, $3) }

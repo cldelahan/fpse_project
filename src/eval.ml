@@ -52,7 +52,7 @@ let rec eval (exp: expr) : expr =
     )
   | Who (e1, e2, num_rec) -> (match (eval e1, eval e2) with
       | (Relation (Ident rel_ident), Node (Ident node_ident)) -> 
-        let nodes = Broql.who !instance rel_ident num_rec in
+        let nodes = Broql.who !instance rel_ident num_rec node_ident in
         NodeList (List.map nodes ~f:(fun s -> Node (Ident s)))
       | _ -> raise @@ Exception "Incorrect usage"
     )
