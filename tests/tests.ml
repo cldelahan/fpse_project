@@ -236,7 +236,7 @@ let test_parser_create_node _ =
   assert_equal (CreateNode (Ident "x", "{name: \"Conner\", age: \"22\"}")) @@ parse "NODE x = {name: \"Conner\", age: \"22\"};"
 
 let test_parser_node _ =
-  assert_equal (Node(Ident "x")) @@ parse "NODE x;"
+  assert_equal (Attr (None, Node (Ident "x"))) @@ parse "NODE x;"
 
 let test_parser_create_relation _ =
   assert_equal (CreateRelation (Ident "roommates", None, false)) @@ parse "CREATE RELATION UNDIR roommates;";
@@ -254,7 +254,7 @@ let test_parser_who _ =
   assert_equal (Who (Relation (Ident "is_loved"), Node (Ident "n2"), 3)) @@ parse "WHO is_loved BY n2 REC 3;"
 
 let test_parser_attr _ =
-  assert_equal (Attr (Ident "name", Node (Ident "n1"))) @@ parse "ATTR name n1;"
+  assert_equal (Attr (Some (Ident "name"), Node (Ident "n1"))) @@ parse "ATTR name n1;"
 
 let test_parser_size _ =
   assert_equal (Size ([Node (Ident "n1"); Node (Ident "n2")])) @@ parse "SIZE n1, n2;"
