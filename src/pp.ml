@@ -13,15 +13,19 @@ let rec pp_expr fmt =
   | Msg s -> ff fmt "%s" s
   | Node(Ident x) -> ff fmt "%s" x
   | Relation(Ident x) -> ff fmt "%s" x
+  | RelationPair(Ident x, Ident y) -> ff fmt "%s %s" x y
   | Object x -> ff fmt "%s" x
   | NodeList l -> ff fmt "%a" pp_expr_list l
 
   | CreateNode (Ident x, s) -> ff fmt "NODE %s = %s" x s
-  | CreateRelation (Ident x, l, is_dir) ->
+  | CreateRelation (Ident x, Some (Ident y), _) ->
+    ff fmt "CREATE RELATION %s %s" x y
+  | CreateRelation (Ident x, None, is_dir) ->
     if is_dir then
-      ff fmt "RELATION %s DIR FOR %a" x pp_expr_list l
+      ff fmt "CREATE RELATION %s" x
     else
-      ff fmt "RELATION %s FOR %a" x pp_expr_list l
+      ff fmt "CREATE RELATION UNDIR %s" x
+  | CreateEdge (Ident x, l) -> ff fmt "RELATION %s FOR %a" x pp_expr_list l
 
   | Attr (Ident x, e) -> ff fmt "ATTR %s %a" x pp_expr e
   | Who (e1, e2) -> ff fmt "WHO %a FOR %a" pp_expr e1 pp_expr e2

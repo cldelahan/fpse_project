@@ -32,8 +32,10 @@ main:
 
 expr:
     | NODE ident_decl EQUAL STRING { CreateNode($2, $4) }
-    | RELATION ident_decl FOR node_list { CreateRelation($2, $4, false) }
-    | RELATION ident_decl DIR FOR node_list { CreateRelation($2, $5, true) }
+    | CREATE RELATION ident_decl { CreateRelation($3, None, true) }
+    | CREATE RELATION UNDIR ident_decl { CreateRelation($3, None, false) }
+    | CREATE RELATION ident_decl ident_decl { CreateRelation($3, Some $4, true) }
+    | RELATION ident_decl FOR node_list { CreateEdge($2, $4) }
     | WHO relation_usage FOR node_usage { Who($2, $4) }
     | ATTR ident_decl node_usage { Attr($2, $3) }
     | SIZE node_list { Size $2 }

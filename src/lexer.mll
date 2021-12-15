@@ -13,12 +13,13 @@ let file = ['a'-'z' 'A'-'Z' '0'-'9' '_' '-']+ ".broql"
 rule token = parse
 | blank+                { token lexbuf }
 | "NODE"                { NODE }
+| "CREATE"              { CREATE }
 | "RELATION"            { RELATION }
 | "WHO"                 { WHO }
 | "FOR"                 { FOR }
 | "SIZE"                { SIZE }
 | "REC"                 { REC }
-| "DIR"                 { DIR }
+| "UNDIR"               { UNDIR }
 | "LOAD"                { LOAD }
 | "SAVE"                { SAVE }
 | "ATTR"                { ATTR }
