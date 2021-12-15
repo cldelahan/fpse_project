@@ -18,6 +18,7 @@ rule token = parse
 | "RELATION"            { RELATION }
 | "WHO"                 { WHO }
 | "BY"                  { BY }
+| "OF"                  { OF }
 | "FOR"                 { FOR }
 | "SIZE"                { SIZE }
 | "REC"                 { REC }
