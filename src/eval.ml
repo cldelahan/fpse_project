@@ -27,7 +27,8 @@ let rec eval (exp: expr) : expr =
         | _ -> failwith "Incorrect usage"
       ) in
       let node_identifier_list = List.map l ~f in
-      Broql.add_relation !instance relation_name node_identifier_list is_dir;
+      Broql.create_relation !instance relation_name is_dir;
+      Broql.add_edge !instance relation_name node_identifier_list;
       Relation i
     )
 
@@ -42,7 +43,7 @@ let rec eval (exp: expr) : expr =
     )
   | Who (e1, e2) -> (match (eval e1, eval e2) with
       | (Relation (Ident rel_ident), Node (Ident node_ident)) -> 
-        let nodes = Broql.who !instance rel_ident node_ident in
+        let nodes = Broql.who !instance rel_ident 0 node_ident in
         NodeList (List.map nodes ~f:(fun s -> Node (Ident s)))
       | _ -> failwith "Incorrect usage"
     )
