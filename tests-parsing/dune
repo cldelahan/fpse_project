@@ -1,3 +1,0 @@
-(test
- (name parsing_tests)
- (libraries core ounit2 broql))

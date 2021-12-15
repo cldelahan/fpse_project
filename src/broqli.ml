@@ -61,14 +61,24 @@ let toplevel_loop verbose =
 type operation_usage = {name: string; description: string; example: string}
 let operations = [
   {
-    name = "NODE";
+    name = "NODE (creation)";
     description = "Create a node with key-value data pairs.";
     example = "NODE n1 = {name: \"Conner\", age: \"22\"};"
   };
   {
+    name = "NODE (lookup)";
+    description = "Get the details of an existing node.";
+    example = "NODE n1;"
+  };
+  {
+    name = "CREATE RELATION";
+    description = "Create a new relation, which can be directed (default) or undirected (add keyword UNDIR). A directed relation can also be created in pairs.";
+    example = "CREATE RELATION loves is_loved;\nCREATE RELATION visited;\nCREATE RELATION UNDIR roommates;"
+  };
+  {
     name = "RELATION";
-    description = "Add a relation for certain nodes. Relations can be undirected or directed.";
-    example = "RELATION roommates FOR n1, n2, n3;\nRELATION manages DIR FOR n1, n2, n3;"
+    description = "Add an edge to an existing relation. Directed relations receive only two nodes at a time, while undirected can receive many.";
+    example = "RELATION loves FOR FOR n1, n2;\nRELATION roommates FOR n1, n2, n3, n4;"
   };
   {
     name = "ATTR";
@@ -82,13 +92,23 @@ let operations = [
   };
   {
     name = "WHO";
-    description = "Get nodes that satisfy a certain relation for a node.";
-    example = "WHO roommates FOR n1;"
+    description = "Get nodes that satisfy a certain relation for a node. Can be used to traverse relations recursively. Keyword BY is optional for readability.";
+    example = "WHO roommates n1;\nWHO loves n3;\nWHO is_loved BY n2 REC 2;"
   };
   {
     name = "SIZE";
     description = "Get size of a list of nodes.";
     example = "SIZE WHO roommates FOR n1;"
+  };
+  {
+    name = "SHOW NODES";
+    description = "Get all the nodes in the database";
+    example = "SHOW NODES;"
+  };
+  {
+    name = "SHOW RELATIONS";
+    description = "Get all the relations in the database";
+    example = "SHOW RELATIONS;"
   };
   {
     name = "LOAD";

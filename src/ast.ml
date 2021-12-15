@@ -5,22 +5,26 @@ type expr =
   | Msg of string (* to return messages *)
   | Node of ident
   | Relation of ident
+  | RelationPair of ident * ident
   | Object of string (* JSON formatted *)
   | NodeList of expr list
+  | RelationList of expr list
 
   (* Creating nodes and relations *)
   | CreateNode of ident * string (* string is JSON formatted *)
-  | CreateRelation of ident * (expr list) * bool (* expr list should evaluate to Node list *)
+  | CreateRelation of ident * (ident option) * bool 
+  | CreateEdge of ident * (expr list) (* expr list should evaluate to Node list *)
 
   | Attr of ident * expr (* expr should evaluate to Node *)
 
-  (* | Search of expr (* expr should evaluate to Object *) *)
+  | Search of string (* TODO: swich to Search of expr and make recursive; expr should evaluate to Object *)
 
-  | Who of expr * expr (* expr * expr should evaluate to Relation * Node *)
+  | Who of expr * expr * int (* expr * expr should evaluate to Relation * Node *)
 
   | Size of expr list (* expr list should evaluate to Node list *)
 
-  (* | Extend of expr * expr (* expr * expr should evaluate to NodeList * NodeList *) *)
+  | ShowNodes
+  | ShowRelations
 
   | Load of string
   | Save of string
