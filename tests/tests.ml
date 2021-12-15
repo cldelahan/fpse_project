@@ -47,15 +47,15 @@ let test_node_attr _ =
   assert_equal (Some "45") @@ Node.get_attr n3 "id";
   assert_equal None @@ Node.get_attr n3 "Id"
 
-let test_node_tostring _ = 
+let test_node_to_string _ = 
   assert_equal "{}" @@ Node.to_string n;
-  assert_equal "{name: conner}" @@ Node.to_string n2;
-  assert_equal "{id: 45, name: vini}" @@ Node.to_string n3
+  assert_equal "{name: \"conner\"}" @@ Node.to_string n2;
+  assert_equal "{id: \"45\", name: \"vini\"}" @@ Node.to_string n3
 
 let node_tests =
   "Node Tests" >: test_list [
     "Test Attributes" >:: test_node_attr;
-    "Test ToString" >:: test_node_tostring
+    "Test To String" >:: test_node_to_string
   ]
 
 (* 
@@ -239,7 +239,7 @@ let test_parser_create_relation _ =
   assert_equal (CreateRelation (Ident "likes", Some (Ident "is_liked"), true)) @@ parse "CREATE RELATION likes is_liked;"
 
 let test_parser_create_edge _ =
-  assert_equal (CreateEdge (Ident "roommates", [Node (Ident "n1"); Node (Ident "n2"); Node (Ident "n3")])) @@ parse "RELATION roommates FOR n1, n2, n3;"
+  assert_equal (CreateEdge (Ident "roommates", NodeList [Node (Ident "n1"); Node (Ident "n2"); Node (Ident "n3")])) @@ parse "RELATION roommates FOR n1, n2, n3;"
 
 let test_parser_who _ =
   assert_equal (Who (Relation (Ident "loves"), Node (Ident "n1"), 1)) @@ parse "WHO loves n1;";
@@ -252,10 +252,10 @@ let test_parser_attr _ =
   assert_equal (Attr (Some (Ident "name"), Node (Ident "n1"))) @@ parse "ATTR name n1;"
 
 let test_parser_size _ =
-  assert_equal (Size ([Node (Ident "n1"); Node (Ident "n2")])) @@ parse "SIZE n1, n2;"
+  assert_equal (Size (NodeList [Node (Ident "n1"); Node (Ident "n2")])) @@ parse "SIZE n1, n2;"
 
 let test_parser_search _ =
-  assert_equal (Search "{name: \"Vini\"}") @@ parse "SEARCH {name: \"Vini\"};"
+  assert_equal (Search (Object "{name: \"Vini\"}")) @@ parse "SEARCH {name: \"Vini\"};"
 
 let test_parser_show_nodes _ =
   assert_equal ShowNodes @@ parse "SHOW NODES;"
