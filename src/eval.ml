@@ -30,15 +30,17 @@ let rec eval (exp: expr) : expr =
       Broql.create_relation !instance relation_name is_dir;
       Relation i
     )
-  | CreateEdge (i, l) -> (match i with Ident relation_name ->
-      let f n = (
-        match eval n with
-        | Node (Ident i) -> i
-        | _ -> raise @@ Exception "Incorrect usage"
-      ) in
-      let node_identifier_list = List.map l ~f in
-      Broql.add_edge !instance relation_name node_identifier_list;
-      Relation i
+  | CreateEdge (i, e) -> (match i with Ident relation_name -> match eval e with
+      | NodeList l ->
+        let f n = (
+          match eval n with
+          | Node (Ident i) -> i
+          | _ -> raise @@ Exception "Incorrect usage"
+        ) in
+        let node_identifier_list = List.map l ~f in
+        Broql.add_edge !instance relation_name node_identifier_list;
+        Relation i
+      | _ -> raise @@ Exception "Incorrect usage"
     )
 
   | Attr (Some (Ident attribute), e) -> (
@@ -66,8 +68,12 @@ let rec eval (exp: expr) : expr =
         NodeList (List.map nodes ~f:(fun s -> Node (Ident s)))
       | _ -> raise @@ Exception "Incorrect usage"
     )
-  | Size l -> 
-    let node_list = List.map l ~f:(fun x -> eval x) in Msg ("Size: " ^ (string_of_int @@ List.length node_list))
+  | Size e -> (
+      match eval e with
+      | NodeList l | RelationList l -> let temp_list = List.map l ~f:(fun x -> eval x) in Msg ("Size: " ^ (string_of_int @@ List.length temp_list))
+      | _ -> raise @@ Exception "Incorrect usage"
+    )
+
   | Search s ->
     let nodes = Broql.search !instance s in
     NodeList (List.map nodes ~f:(fun x -> Node (Ident x)))
