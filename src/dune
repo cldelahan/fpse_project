@@ -9,7 +9,7 @@
  (name broql)
  (wrapped false)
  (preprocess
-  (pps ppx_deriving.show))
+  (pps ppx_deriving.show bisect_ppx))
  (modules lexer parser ast pp eval debugutils)
  (libraries graph))
 
@@ -23,10 +23,5 @@
  (name broqli)
  (modules broqli)
  (preprocess
-  (pps ppx_deriving.show))
+  (pps ppx_deriving.show bisect_ppx))
  (libraries broql))
-
-(executable
- (name main)
- (modules main)
- (libraries core graph yojson))
