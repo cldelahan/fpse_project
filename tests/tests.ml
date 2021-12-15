@@ -47,15 +47,15 @@ let test_node_attr _ =
   assert_equal (Some "45") @@ Node.get_attr n3 "id";
   assert_equal None @@ Node.get_attr n3 "Id"
 
-let test_node_tostring _ = 
+let test_node_to_string _ = 
   assert_equal "{}" @@ Node.to_string n;
-  assert_equal "{name: conner}" @@ Node.to_string n2;
-  assert_equal "{id: 45, name: vini}" @@ Node.to_string n3
+  assert_equal "{name: \"conner\"}" @@ Node.to_string n2;
+  assert_equal "{id: \"45\", name: \"vini\"}" @@ Node.to_string n3
 
 let node_tests =
   "Node Tests" >: test_list [
     "Test Attributes" >:: test_node_attr;
-    "Test ToString" >:: test_node_tostring
+    "Test To String" >:: test_node_to_string
   ]
 
 (* 
@@ -88,16 +88,15 @@ let opt_equal ~f o1_o o2_o =
 let test_database_nodes _ =
   assert_equal true @@ (opt_equal ~f:Node.equal None (Database.get_node d2 "n10"));
   assert_equal true @@ (opt_equal ~f:Node.equal (Some n2) (Database.get_node d2 "n2"));
-  assert_equal false @@ (opt_equal  ~f: Node.equal (Some n3) (Database.get_node d2 "n2"))
+  assert_equal false @@ (opt_equal  ~f: Node.equal (Some n3) (Database.get_node d2 "n2"));;
 
 
 let test_database_relations _ = 
   assert_equal true @@ (Database.has_relation d3 "friends");
-  assert_equal false @@ (Database.has_relation d3 "not_friends")
-
+  assert_equal false @@ (Database.has_relation d3 "not_friends");;
 
 let test_database_neighbors _ = 
-  assert_equal ["n"] @@ (Database.neighbors d3 "loves" "n2");
+  assert_equal ["n3"] @@ (Database.neighbors d3 "loves" "n2");
   assert_equal ["n2"] @@ (Database.neighbors d3 "friends" "n");;
 
 
@@ -140,31 +139,27 @@ Broql.create_relation b "loves" true;;
 Broql.add_edge b "loves" ["node3"; "node2"];; (* node3 loves node2 *)
 Broql.add_edge b "loves" ["node2"; "node1"];; (* node2 loves node1 *)
 
+(* List.map (Database.neighbors b.db "manages" "node2") ~f:(fun x-> Printf.printf "%s\n" x);; *)
+
 (* Assert that creating a relation that is paired creates the pair *)
 let test_broql_paired_relations_inserts _ = 
-  assert_equal ["node2"] @@ (Database.neighbors b.db "manages" "node1"); (* who node1 manages? *)
-  assert_equal ["node2"] @@ (Database.neighbors b.db "manages" "node3"); (* who node3 manages? *)
-  assert_equal ["node3"; "node1"] @@ (Database.neighbors b.db "is_managed_by" "node2")
-
-
-(* List.map (Broql.who b "loves" ~recurse:true ~times:2 "node3") ~f:(fun x-> Printf.printf "%s\n" x);; *)
-
+  assert_equal ["node2"] @@ (Database.neighbors b.db "is_managed_by" "node3"); (* who node1 manages? *)
+  assert_equal [] @@ (Database.neighbors b.db "is_managed_by" "node2"); (* who node3 manages? *)
+  assert_equal ["node3"; "node1"] @@ (Database.neighbors b.db "manages" "node2");;
 
 let test_broql_who_rec _ = 
-  assert_equal ["node2"] @@ (Broql.who b "manages" 1 "node1");
-  assert_equal ["node3"; "node1"] @@ (Broql.who b "is_managed_by" 1 "node2");
-  assert_equal ["node1"] @@ (Broql.who b "loves" 2 "node3");
-  assert_equal ["node2"] @@ (Broql.who b "loves" 1 "node3");
-  assert_equal ["node1"] @@ (Broql.who b "loves" 1 "node2")
+  assert_equal ["node3"; "node1"] @@ (Broql.who b "manages" 1 "node2");
+  assert_equal [] @@ (Broql.who b "is_managed_by" 1 "node2");
+  assert_equal ["node3"] @@ (Broql.who b "loves" 2 "node1");
+  assert_equal ["node3"] @@ (Broql.who b "loves" 1 "node2");
+  assert_equal ["node2"] @@ (Broql.who b "loves" 1 "node1");;
 (* assert_equal true @@ true;; *)
-
-
 
 let test_broql_search _ = 
   assert_equal ["node1"] @@ (Broql.search b "{name: \"vini\"}");
   assert_equal ["node4"] @@ (Broql.search b "{height: \"tall\"}");
   assert_equal ["node3"; "node4"] @@ (Broql.search b "{id: \"11\"}");
-  assert_equal ["node1"; "node2"; "node3"; "node4"] @@ (Broql.search b "{}")
+  assert_equal ["node1"; "node2"; "node3"; "node4"] @@ (Broql.search b "{}");;
 
 
 (* Write and read from file *)
@@ -175,13 +170,13 @@ let i_recovered = Broql.load path;;
 let test_broql_fileio _ = 
   assert_equal (Some "vini") @@ Broql.get_attr i_recovered ~name:"name" "node1";
   assert_equal (Some "67") @@ Broql.get_attr i_recovered ~name:"id" "node2";
-  assert_equal None @@ Broql.get_attr i_recovered ~name:"Id" "node2"
+  assert_equal None @@ Broql.get_attr i_recovered ~name:"Id" "node2";;
 
 
 (* Test miscellaneous functionality *)
 let test_broql_misc _ = 
   assert_equal ["node1"; "node2"; "node3"; "node4"] @@ Broql.show_nodes b;
-  assert_equal ["is_managed_by"; "loves"; "manages"; "roomates"] @@ Broql.show_relations b
+  assert_equal ["is_managed_by"; "loves"; "manages"; "roomates"] @@ Broql.show_relations b;;
 
 
 let broql_tests =
@@ -236,7 +231,7 @@ let test_parser_create_node _ =
   assert_equal (CreateNode (Ident "x", "{name: \"Conner\", age: \"22\"}")) @@ parse "NODE x = {name: \"Conner\", age: \"22\"};"
 
 let test_parser_node _ =
-  assert_equal (Node(Ident "x")) @@ parse "NODE x;"
+  assert_equal (Attr (None, Node (Ident "x"))) @@ parse "NODE x;"
 
 let test_parser_create_relation _ =
   assert_equal (CreateRelation (Ident "roommates", None, false)) @@ parse "CREATE RELATION UNDIR roommates;";
@@ -244,7 +239,7 @@ let test_parser_create_relation _ =
   assert_equal (CreateRelation (Ident "likes", Some (Ident "is_liked"), true)) @@ parse "CREATE RELATION likes is_liked;"
 
 let test_parser_create_edge _ =
-  assert_equal (CreateEdge (Ident "roommates", [Node (Ident "n1"); Node (Ident "n2"); Node (Ident "n3")])) @@ parse "RELATION roommates FOR n1, n2, n3;"
+  assert_equal (CreateEdge (Ident "roommates", NodeList [Node (Ident "n1"); Node (Ident "n2"); Node (Ident "n3")])) @@ parse "RELATION roommates FOR n1, n2, n3;"
 
 let test_parser_who _ =
   assert_equal (Who (Relation (Ident "loves"), Node (Ident "n1"), 1)) @@ parse "WHO loves n1;";
@@ -254,13 +249,13 @@ let test_parser_who _ =
   assert_equal (Who (Relation (Ident "is_loved"), Node (Ident "n2"), 3)) @@ parse "WHO is_loved BY n2 REC 3;"
 
 let test_parser_attr _ =
-  assert_equal (Attr (Ident "name", Node (Ident "n1"))) @@ parse "ATTR name n1;"
+  assert_equal (Attr (Some (Ident "name"), Node (Ident "n1"))) @@ parse "ATTR name n1;"
 
 let test_parser_size _ =
-  assert_equal (Size ([Node (Ident "n1"); Node (Ident "n2")])) @@ parse "SIZE n1, n2;"
+  assert_equal (Size (NodeList [Node (Ident "n1"); Node (Ident "n2")])) @@ parse "SIZE n1, n2;"
 
 let test_parser_search _ =
-  assert_equal (Search "{name: \"Vini\"}") @@ parse "SEARCH {name: \"Vini\"};"
+  assert_equal (Search (Object "{name: \"Vini\"}")) @@ parse "SEARCH {name: \"Vini\"};"
 
 let test_parser_show_nodes _ =
   assert_equal ShowNodes @@ parse "SHOW NODES;"

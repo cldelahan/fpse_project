@@ -26,13 +26,14 @@ let rec pp_expr fmt =
       ff fmt "CREATE RELATION %s" x
     else
       ff fmt "CREATE RELATION UNDIR %s" x
-  | CreateEdge (Ident x, l) -> ff fmt "RELATION %s FOR %a" x pp_expr_list l
+  | CreateEdge (Ident x, e) -> ff fmt "RELATION %s FOR %a" x pp_expr e
 
-  | Attr (Ident x, e) -> ff fmt "ATTR %s %a" x pp_expr e
+  | Attr (Some (Ident x), e) -> ff fmt "ATTR %s %a" x pp_expr e
+  | Attr (None, e) -> ff fmt "NODE %a" pp_expr e
   | Who (e1, e2, num_rec) -> 
     ff fmt "WHO %a %a %s" pp_expr e1 pp_expr e2 (if num_rec >= 1 then ("REC" ^ string_of_int num_rec) else "")
-  | Size l -> ff fmt "SIZE %a" pp_expr_list l
-  | Search s -> ff fmt "SEARCH %s" s
+  | Size e -> ff fmt "SIZE %a" pp_expr e
+  | Search e -> ff fmt "SEARCH %a" pp_expr e
 
   | ShowNodes -> ff fmt "SHOW NODES"
   | ShowRelations -> ff fmt "SHOW RELATIONS"

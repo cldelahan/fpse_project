@@ -39,8 +39,8 @@ module Node = struct
     let rec acc keys s = (
       match keys with 
       | [] -> s ^ "}"
-      | hd :: [] -> acc [] (String.concat [s; hd; ": "; String_Map.find_exn a hd])
-      | hd :: tl -> acc tl (String.concat [s; hd; ": "; String_Map.find_exn a hd; ", "])
+      | hd :: [] -> acc [] (String.concat [s; hd; ": \""; String_Map.find_exn a hd; "\""])
+      | hd :: tl -> acc tl (String.concat [s; hd; ": \""; String_Map.find_exn a hd; "\", "])
     ) in acc (String_Map.keys a) "{"
 end
 
@@ -59,7 +59,7 @@ module Edge = struct
     {id = a.id; node_ids = nodes}
   let get_neighbors (node: string) (is_dir: bool) (a: t) = 
     if is_dir then match a.node_ids with
-      | n :: v when String.(=) n node -> v
+      | n :: v :: _ when String.(=) v node -> [n]
       | _ -> []
     else List.filter a.node_ids ~f:(fun n -> not @@ String.(=) node n)
 end
@@ -89,6 +89,8 @@ module Relation = struct
     Can change this so we can target specific edges
   *)
   let add_edge (a: t) (id: string) (nodes: string list)=
+    if a.is_dir && not (List.length nodes = 2) then raise @@ Exception "Directed relations only accept two participants"
+    else
     let e = Edge.create id nodes in
     add_edge_obj a e
 
@@ -108,14 +110,16 @@ module Database = struct
     (String_Map.equal Relation.equal d1.relations d2.relations) &&
     (String_Map.equal Node.equal d1.nodes d2.nodes) &&
     (String_Map.equal String.(=) d1.paired_relation d2.paired_relation)
-  let add_node_exn (db: t) (id: string) (node: Node.t) = 
-    let new_nodes = String_Map.add_exn db.nodes ~key:id ~data:node in
-    {relations = db.relations; nodes = new_nodes; paired_relation = db.paired_relation}
-
   let has_node (db: t) (id: string) = 
     match String_Map.find db.nodes id with
     | Some _ -> true
     | None -> false
+  let add_node_exn (db: t) (id: string) (node: Node.t) = 
+    if has_node db id then raise @@ Exception "Node already exists"
+    else
+      let new_nodes = String_Map.add_exn db.nodes ~key:id ~data:node in
+      {relations = db.relations; nodes = new_nodes; paired_relation = db.paired_relation}
+
 
   let has_relation (db: t) (id: string) = 
     match String_Map.find db.relations id with
