@@ -7,7 +7,7 @@ let list_of_lexbuf (lexbuf: Lexing.lexbuf): Parser.token list =
     | _ as t -> helper lexbuf (t :: cur_list)
   in List.rev @@ helper lexbuf []
 
-let lex s =
+let debug_lex s =
   let lexbuf = Lexing.from_string (s^";") in
   list_of_lexbuf lexbuf
 
