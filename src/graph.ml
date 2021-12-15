@@ -108,14 +108,16 @@ module Database = struct
     (String_Map.equal Relation.equal d1.relations d2.relations) &&
     (String_Map.equal Node.equal d1.nodes d2.nodes) &&
     (String_Map.equal String.(=) d1.paired_relation d2.paired_relation)
-  let add_node_exn (db: t) (id: string) (node: Node.t) = 
-    let new_nodes = String_Map.add_exn db.nodes ~key:id ~data:node in
-    {relations = db.relations; nodes = new_nodes; paired_relation = db.paired_relation}
-
   let has_node (db: t) (id: string) = 
     match String_Map.find db.nodes id with
     | Some _ -> true
     | None -> false
+  let add_node_exn (db: t) (id: string) (node: Node.t) = 
+    if has_node db id then raise @@ Exception "Node already exists"
+    else
+    let new_nodes = String_Map.add_exn db.nodes ~key:id ~data:node in
+    {relations = db.relations; nodes = new_nodes; paired_relation = db.paired_relation}
+
 
   let has_relation (db: t) (id: string) = 
     match String_Map.find db.relations id with
