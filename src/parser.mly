@@ -53,7 +53,8 @@ expr:
     | ATTR ident_decl node_usage { Attr(Some $2, $3) }
     | SIZE node_list { Size $2 }
     | SIZE LPAREN expr RPAREN { Size $3 }
-    | SEARCH STRING { Search($2) }
+    | SEARCH STRING { Search(Object $2) }
+    | SEARCH LPAREN expr RPAREN { Search $3 }
     | SHOW NODES { ShowNodes }
     | SHOW RELATIONS { ShowRelations }
     | LOAD STRING { Load $2 }

@@ -33,7 +33,7 @@ let rec pp_expr fmt =
   | Who (e1, e2, num_rec) -> 
     ff fmt "WHO %a %a %s" pp_expr e1 pp_expr e2 (if num_rec >= 1 then ("REC" ^ string_of_int num_rec) else "")
   | Size e -> ff fmt "SIZE %a" pp_expr e
-  | Search s -> ff fmt "SEARCH %s" s
+  | Search e -> ff fmt "SEARCH %a" pp_expr e
 
   | ShowNodes -> ff fmt "SHOW NODES"
   | ShowRelations -> ff fmt "SHOW RELATIONS"

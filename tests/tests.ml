@@ -260,7 +260,7 @@ let test_parser_size _ =
   assert_equal (Size (NodeList [Node (Ident "n1"); Node (Ident "n2")])) @@ parse "SIZE n1, n2;"
 
 let test_parser_search _ =
-  assert_equal (Search "{name: \"Vini\"}") @@ parse "SEARCH {name: \"Vini\"};"
+  assert_equal (Search (Object "{name: \"Vini\"}")) @@ parse "SEARCH {name: \"Vini\"};"
 
 let test_parser_show_nodes _ =
   assert_equal ShowNodes @@ parse "SHOW NODES;"

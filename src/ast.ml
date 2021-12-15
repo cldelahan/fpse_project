@@ -17,7 +17,7 @@ type expr =
 
   | Attr of (ident option) * expr (* expr should evaluate to Node *)
 
-  | Search of string (* TODO: swich to Search of expr and make recursive; expr should evaluate to Object *)
+  | Search of expr (* expr should evaluate to Object *)
 
   | Who of expr * expr * int (* expr * expr should evaluate to Relation * Node *)
 
