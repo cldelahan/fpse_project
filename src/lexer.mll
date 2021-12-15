@@ -29,9 +29,13 @@ rule token = parse
 | "NODES"               { NODES }
 | "RELATIONS"           { RELATIONS }
 | "SEARCH"              { SEARCH }
+| "QUIT"                { QUIT }
+| "BROQLI" | "BROQL"    { BROQL }
 | "="                   { EQUAL }
 | ","                   { COMMA }
 | ";"                   { EOEX }
+| "("                   { LPAREN }
+| ")"                   { RPAREN }
 | lowercase identchar*  { IDENT (Lexing.lexeme lexbuf) }
 | decimal_literal       { INT (int_of_string(Lexing.lexeme lexbuf))}
 | object                { STRING (Lexing.lexeme lexbuf) }

@@ -1,5 +1,19 @@
 %{
     open Ast;;
+
+    let broqli_text_art = "
+        /$$$$$$$  /$$$$$$$   /$$$$$$   /$$$$$$  /$$       /$$$$$$
+        | $$__  $$| $$__  $$ /$$__  $$ /$$__  $$| $$      |_  $$_/
+        | $$  \\ $$| $$  \\ $$| $$  \\ $$| $$  \\ $$| $$        | $$  
+        | $$$$$$$ | $$$$$$$/| $$  | $$| $$  | $$| $$        | $$  
+        | $$__  $$| $$__  $$| $$  | $$| $$  | $$| $$        | $$  
+        | $$  \\ $$| $$  \\ $$| $$  | $$| $$/$$ $$| $$        | $$  
+        | $$$$$$$/| $$  | $$|  $$$$$$/|  $$$$$$/| $$$$$$$$ /$$$$$$
+        |_______/ |__/  |__/ \\______/  \\____ $$$|________/|______/
+                                            \\__/                  
+
+
+        "
 %}
 
 /*
@@ -22,7 +36,12 @@
 %token RELATIONS
 %token SEARCH
 %token EQUAL
+%token QUIT
+%token BROQL
+
 %token COMMA
+%token LPAREN
+%token RPAREN
 %token EOEX
 
 %token <string> STRING
@@ -50,11 +69,15 @@ expr:
     | WHO relation_usage BY node_usage REC INT { Who($2, $4, $6) } (* Allow BY as syntactic sugar *)
     | ATTR ident_decl node_usage { Attr(Some $2, $3) }
     | SIZE node_list { Size $2 }
-    | SEARCH STRING { Search($2) }
+    | SIZE LPAREN expr RPAREN { Size $3 }
+    | SEARCH STRING { Search(Object $2) }
+    | SEARCH LPAREN expr RPAREN { Search $3 }
     | SHOW NODES { ShowNodes }
     | SHOW RELATIONS { ShowRelations }
     | LOAD STRING { Load $2 }
     | SAVE STRING { Save $2 }
+    | QUIT { exit 0 }
+    | BROQL { Msg broqli_text_art }
 ;
 
 node_usage:
@@ -70,7 +93,7 @@ ident_decl:
 ;
 
 node_list:
-    separated_list(COMMA, node_usage) { $1 }
+    separated_list(COMMA, node_usage) { NodeList $1 }
 ;
 
 %%
