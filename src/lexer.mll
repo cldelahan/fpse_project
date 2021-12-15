@@ -3,6 +3,7 @@
 }
 
 let blank = [' ' '\t' '\n' '\r']
+let decimal_literal = ['0'-'9']+
 let lowercase = ['a'-'z' '\223'-'\246' '\248'-'\255' '_']
 let identchar =
   ['A'-'Z' 'a'-'z' '_' '\192'-'\214' '\216'-'\246' '\248'-'\255' '\'' '0'-'9']
@@ -16,6 +17,7 @@ rule token = parse
 | "CREATE"              { CREATE }
 | "RELATION"            { RELATION }
 | "WHO"                 { WHO }
+| "BY"                  { BY }
 | "FOR"                 { FOR }
 | "SIZE"                { SIZE }
 | "REC"                 { REC }
@@ -27,6 +29,7 @@ rule token = parse
 | ","                   { COMMA }
 | ";"                   { EOEX }
 | lowercase identchar*  { IDENT (Lexing.lexeme lexbuf) }
+| decimal_literal       { INT (int_of_string(Lexing.lexeme lexbuf))}
 | object                { STRING (Lexing.lexeme lexbuf) }
 | file                  { STRING (Lexing.lexeme lexbuf) }
 | eof                   { raise Exit }

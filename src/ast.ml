@@ -18,7 +18,7 @@ type expr =
 
   (* | Search of expr (* expr should evaluate to Object *) *)
 
-  | Who of expr * expr (* expr * expr should evaluate to Relation * Node *)
+  | Who of expr * expr * int (* expr * expr should evaluate to Relation * Node *)
 
   | Size of expr list (* expr list should evaluate to Node list *)
 

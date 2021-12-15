@@ -28,7 +28,8 @@ let rec pp_expr fmt =
   | CreateEdge (Ident x, l) -> ff fmt "RELATION %s FOR %a" x pp_expr_list l
 
   | Attr (Ident x, e) -> ff fmt "ATTR %s %a" x pp_expr e
-  | Who (e1, e2) -> ff fmt "WHO %a FOR %a" pp_expr e1 pp_expr e2
+  | Who (e1, e2, num_rec) -> 
+    ff fmt "WHO %a %a %s" pp_expr e1 pp_expr e2 (if num_rec >= 1 then ("REC" ^ string_of_int num_rec) else "")
   | Size l -> ff fmt "SIZE %a" pp_expr_list l
 
   | Load s -> ff fmt "LOAD %s" s
