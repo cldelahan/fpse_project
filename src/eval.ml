@@ -58,6 +58,9 @@ let rec eval (exp: expr) : expr =
     )
   | Size l -> 
     let node_list = List.map l ~f:(fun x -> eval x) in Msg ("Size: " ^ (string_of_int @@ List.length node_list))
+  | Search s ->
+    let nodes = Broql.search !instance s in
+    NodeList (List.map nodes ~f:(fun x -> Node (Ident x)))
 
   | ShowNodes -> let l = Broql.show_nodes !instance in NodeList (List.map l ~f:(fun x -> Node (Ident x)))
   | ShowRelations -> let l = Broql.show_relations !instance in RelationList (List.map l ~f:(fun x -> Relation (Ident x)))

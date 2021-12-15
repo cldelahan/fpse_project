@@ -28,6 +28,7 @@ rule token = parse
 | "SHOW"                { SHOW }
 | "NODES"               { NODES }
 | "RELATIONS"           { RELATIONS }
+| "SEARCH"              { SEARCH }
 | "="                   { EQUAL }
 | ","                   { COMMA }
 | ";"                   { EOEX }

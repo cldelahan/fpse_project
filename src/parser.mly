@@ -20,6 +20,7 @@
 %token SHOW
 %token NODES
 %token RELATIONS
+%token SEARCH
 %token EQUAL
 %token COMMA
 %token EOEX
@@ -48,6 +49,7 @@ expr:
     | WHO relation_usage BY node_usage REC INT { Who($2, $4, $6) } (* Allow BY as syntactic sugar *)
     | ATTR ident_decl node_usage { Attr($2, $3) }
     | SIZE node_list { Size $2 }
+    | SEARCH STRING { Search($2) }
     | SHOW NODES { ShowNodes }
     | SHOW RELATIONS { ShowRelations }
     | LOAD STRING { Load $2 }
