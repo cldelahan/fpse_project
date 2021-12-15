@@ -47,15 +47,15 @@ let test_node_attr _ =
   assert_equal (Some "45") @@ Node.get_attr n3 "id";
   assert_equal None @@ Node.get_attr n3 "Id"
 
-let test_node_tostring _ = 
+let test_node_to_string _ = 
   assert_equal "{}" @@ Node.to_string n;
-  assert_equal "{name: conner}" @@ Node.to_string n2;
-  assert_equal "{id: 45, name: vini}" @@ Node.to_string n3
+  assert_equal "{name: \"conner\"}" @@ Node.to_string n2;
+  assert_equal "{id: \"45\", name: \"vini\"}" @@ Node.to_string n3
 
 let node_tests =
   "Node Tests" >: test_list [
     "Test Attributes" >:: test_node_attr;
-    "Test ToString" >:: test_node_tostring
+    "Test To String" >:: test_node_to_string
   ]
 
 (* 

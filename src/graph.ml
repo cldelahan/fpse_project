@@ -39,8 +39,8 @@ module Node = struct
     let rec acc keys s = (
       match keys with 
       | [] -> s ^ "}"
-      | hd :: [] -> acc [] (String.concat [s; hd; ": "; String_Map.find_exn a hd])
-      | hd :: tl -> acc tl (String.concat [s; hd; ": "; String_Map.find_exn a hd; ", "])
+      | hd :: [] -> acc [] (String.concat [s; hd; ": \""; String_Map.find_exn a hd; "\""])
+      | hd :: tl -> acc tl (String.concat [s; hd; ": \""; String_Map.find_exn a hd; "\", "])
     ) in acc (String_Map.keys a) "{"
 end
 
@@ -115,8 +115,8 @@ module Database = struct
   let add_node_exn (db: t) (id: string) (node: Node.t) = 
     if has_node db id then raise @@ Exception "Node already exists"
     else
-    let new_nodes = String_Map.add_exn db.nodes ~key:id ~data:node in
-    {relations = db.relations; nodes = new_nodes; paired_relation = db.paired_relation}
+      let new_nodes = String_Map.add_exn db.nodes ~key:id ~data:node in
+      {relations = db.relations; nodes = new_nodes; paired_relation = db.paired_relation}
 
 
   let has_relation (db: t) (id: string) = 
