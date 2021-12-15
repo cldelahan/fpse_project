@@ -11,11 +11,7 @@ let instance = ref Broql.empty
 let rec eval (exp: expr) : expr = 
   match exp with
   | Msg _ -> exp
-  | Node (Ident node_name) -> (
-      match Broql.get_attr !instance node_name with
-      | Some s -> Msg s
-      | None -> Msg "Node not found"
-    )
+  | Node _ -> exp
   | Relation _ -> exp
   | RelationPair _ -> exp
   | Object _ -> exp
@@ -45,7 +41,7 @@ let rec eval (exp: expr) : expr =
       Relation i
     )
 
-  | Attr (Ident attribute, e) -> (
+  | Attr (Some (Ident attribute), e) -> (
       match e with
       | Node i -> (match i with Ident node_name ->
         match Broql.get_attr !instance node_name ~name:attribute with
@@ -54,6 +50,16 @@ let rec eval (exp: expr) : expr =
         )
       | _ -> raise @@ Exception "Incorrect usage"
     )
+  | Attr (None, e) -> (
+      match eval e with
+      | Node (Ident node_name) -> (
+          match Broql.get_attr !instance node_name with
+          | Some s -> Msg s
+          | None -> Msg "Node not found"
+        )
+      | _ -> raise @@ Exception "Incorrect usage"
+    )
+
   | Who (e1, e2, num_rec) -> (match (eval e1, eval e2) with
       | (Relation (Ident rel_ident), Node (Ident node_ident)) -> 
         let nodes = Broql.who !instance rel_ident num_rec node_ident in

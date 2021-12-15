@@ -15,7 +15,7 @@ type expr =
   | CreateRelation of ident * (ident option) * bool 
   | CreateEdge of ident * (expr list) (* expr list should evaluate to Node list *)
 
-  | Attr of ident * expr (* expr should evaluate to Node *)
+  | Attr of (ident option) * expr (* expr should evaluate to Node *)
 
   | Search of string (* TODO: swich to Search of expr and make recursive; expr should evaluate to Object *)
 

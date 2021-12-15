@@ -39,7 +39,7 @@ main:
 
 expr:
     | NODE ident_decl EQUAL STRING { CreateNode($2, $4) }
-    | NODE node_usage { $2 }
+    | NODE node_usage { Attr(None, $2) }
     | CREATE RELATION ident_decl { CreateRelation($3, None, true) }
     | CREATE RELATION UNDIR ident_decl { CreateRelation($4, None, false) }
     | CREATE RELATION ident_decl ident_decl { CreateRelation($3, Some $4, true) }
@@ -48,7 +48,7 @@ expr:
     | WHO relation_usage BY node_usage { Who($2, $4, 1) } (* Allow BY as syntactic sugar *)
     | WHO relation_usage node_usage REC INT { Who($2, $3, $5) }
     | WHO relation_usage BY node_usage REC INT { Who($2, $4, $6) } (* Allow BY as syntactic sugar *)
-    | ATTR ident_decl node_usage { Attr($2, $3) }
+    | ATTR ident_decl node_usage { Attr(Some $2, $3) }
     | SIZE node_list { Size $2 }
     | SEARCH STRING { Search($2) }
     | SHOW NODES { ShowNodes }
