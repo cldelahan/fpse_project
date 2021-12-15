@@ -39,6 +39,7 @@ main:
 
 expr:
     | NODE ident_decl EQUAL STRING { CreateNode($2, $4) }
+    | NODE node_usage { $2 }
     | CREATE RELATION ident_decl { CreateRelation($3, None, true) }
     | CREATE RELATION UNDIR ident_decl { CreateRelation($4, None, false) }
     | CREATE RELATION ident_decl ident_decl { CreateRelation($3, Some $4, true) }

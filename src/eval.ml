@@ -11,7 +11,11 @@ let instance = ref Broql.empty
 let rec eval (exp: expr) : expr = 
   match exp with
   | Msg _ -> exp
-  | Node _ -> exp
+  | Node (Ident node_name) -> (
+      match Broql.get_attr !instance node_name with
+      | Some s -> Msg s
+      | None -> Msg "Node not found"
+    )
   | Relation _ -> exp
   | RelationPair _ -> exp
   | Object _ -> exp

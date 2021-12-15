@@ -30,18 +30,18 @@ module Node = struct
       | (k, v) -> add_attr a k (Yojson.Basic.Util.to_string v) in
     try
       let l = Yojson.Basic.from_string json in
-        let v = Yojson.Basic.Util.values l in
-        let k = Yojson.Basic.Util.keys l in
-        List.fold (List.zip_exn k v) ~init:a ~f:acc
+      let v = Yojson.Basic.Util.values l in
+      let k = Yojson.Basic.Util.keys l in
+      List.fold (List.zip_exn k v) ~init:a ~f:acc
     with Yojson.Json_error "Blank input data" -> a
 
   let to_string (a: t) = 
-    let rec acc keys s = 
-      match keys with
-      | k :: rest ->  if String.(=) s "" then acc rest (String.concat [k; ": "; String_Map.find_exn a k])
-                      else acc rest (String.concat [s;" "; k; ": "; String_Map.find_exn a k])
-      | [] -> s in
-    acc (String_Map.keys a) ""
+    let rec acc keys s = (
+      match keys with 
+      | [] -> s ^ "}"
+      | hd :: [] -> acc [] (String.concat [s; hd; ": "; String_Map.find_exn a hd])
+      | hd :: tl -> acc tl (String.concat [s; hd; ": "; String_Map.find_exn a hd; ", "])
+    ) in acc (String_Map.keys a) "{"
 end
 
 
@@ -116,7 +116,7 @@ module Database = struct
     match String_Map.find db.nodes id with
     | Some _ -> true
     | None -> false
-  
+
   let has_relation (db: t) (id: string) = 
     match String_Map.find db.relations id with
     | Some _ -> true
@@ -152,7 +152,7 @@ module Database = struct
       let r = Relation.create rel_id is_dir in
       add_relation_obj db rel_id r
 
-  
+
   (* Add a edge to the database*)
   let add_edge (db: t) (rel_id: string) (nodes: string list) = 
     if has_relation db rel_id then 
@@ -207,7 +207,7 @@ module Broql = struct
   (* Interpreter-level functions. Correspond to command-line commands *)
   let add_node (a: t) ?(json = "") (id: string) = 
     let n = Node.set_from_json Node.empty json in
-      a.db <- Database.add_node_exn a.db id n
+    a.db <- Database.add_node_exn a.db id n
 
   let create_relation (a: t) (rel_id: string) (is_dir: bool) = 
     let db' = Database.create_relation a.db rel_id is_dir in a.db <- db'
@@ -226,10 +226,10 @@ module Broql = struct
 
   let get_attr (a: t) ?(name) (node_id: string) = 
     let n_opt = Database.get_node (a.db) node_id in
-      match (n_opt, name) with 
-      | (Some (n), Some (attr_name)) -> Node.get_attr n attr_name
-      | (Some (n), None) -> Some(Node.to_string n)
-      | (None, _) -> None
+    match (n_opt, name) with 
+    | (Some (n), Some (attr_name)) -> Node.get_attr n attr_name
+    | (Some (n), None) -> Some(Node.to_string n)
+    | (None, _) -> None
 
   let search (a: t) (json: string) = 
     let query_node = Node.set_from_json Node.empty json in
@@ -262,9 +262,9 @@ module Broql = struct
 
   let save (a: t) (path: string) = 
     let str = Sexp.to_string (sexp_of_t a) in
-      let oc = Out_channel.create path in
-        Printf.fprintf oc "%s\n" str;
-        Out_channel.close oc
+    let oc = Out_channel.create path in
+    Printf.fprintf oc "%s\n" str;
+    Out_channel.close oc
 
   let load (path: string) = 
     let ic = In_channel.create path in
@@ -272,7 +272,7 @@ module Broql = struct
       match In_channel.input_line ic with 
       | None -> In_channel.close ic; empty
       | Some (str) -> In_channel.close ic; let sexp = Sexp.of_string str in
-                      t_of_sexp sexp
+        t_of_sexp sexp
     with _ -> 
       empty
 
