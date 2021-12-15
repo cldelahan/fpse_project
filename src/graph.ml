@@ -59,7 +59,7 @@ module Edge = struct
     {id = a.id; node_ids = nodes}
   let get_neighbors (node: string) (is_dir: bool) (a: t) = 
     if is_dir then match a.node_ids with
-      | n :: v when String.(=) n node -> v
+      | n :: v :: _ when String.(=) v node -> [n]
       | _ -> []
     else List.filter a.node_ids ~f:(fun n -> not @@ String.(=) node n)
 end
@@ -89,6 +89,8 @@ module Relation = struct
     Can change this so we can target specific edges
   *)
   let add_edge (a: t) (id: string) (nodes: string list)=
+    if a.is_dir && not (List.length nodes = 2) then raise @@ Exception "Directed relations only accept two participants"
+    else
     let e = Edge.create id nodes in
     add_edge_obj a e
 
