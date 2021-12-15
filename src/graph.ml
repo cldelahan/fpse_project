@@ -46,20 +46,19 @@ end
 
 
 module Edge = struct
-  type t = {id: string; node_ids: string list; is_dir: bool} [@@deriving sexp]
+  type t = {id: string; node_ids: string list} [@@deriving sexp]
   let equal (e1: t) (e2: t) = 
     (List.equal String.(=) e1.node_ids e2.node_ids) &&
-    (String.(=) e1.id e2.id) &&
-    (Bool.(=) e1.is_dir e2.is_dir)
-  let empty = {id = ""; node_ids = []; is_dir = false}
+    (String.(=) e1.id e2.id)
+  let empty = {id = ""; node_ids = []}
   let get_id (a: t) = a.id
-  let create (eid: string) (nodes: string list) (dir: bool) = 
-    {id = eid; node_ids = nodes; is_dir = dir}
+  let create (eid: string) (nodes: string list) = 
+    {id = eid; node_ids = nodes}
   let get_nodes (a: t) = a.node_ids
   let set_nodes (a: t) (nodes: string list) = 
-    {id = a.id; node_ids = nodes; is_dir = a.is_dir}
-  let get_neighbors (node: string) (a: t) = 
-    if a.is_dir then match a.node_ids with
+    {id = a.id; node_ids = nodes}
+  let get_neighbors (node: string) (is_dir: bool) (a: t) = 
+    if is_dir then match a.node_ids with
       | n :: v when String.(=) n node -> v
       | _ -> []
     else List.filter a.node_ids ~f:(fun n -> not @@ String.(=) node n)
@@ -67,16 +66,18 @@ end
 
 module Relation = struct
   (* Map from node id to list of edges that node is invloved in *)
-  type t = {id: string; participants: (Edge.t list) String_Map.t} [@@deriving sexp]
-  let empty = {id =  ""; participants = String_Map.empty}
+  type t = {id: string; participants: (Edge.t list) String_Map.t; is_dir: bool} [@@deriving sexp]
+  let empty = {id =  ""; participants = String_Map.empty; is_dir = true}
   let equal (r1: t) (r2: t) = 
     (String_Map.equal (List.equal Edge.equal) r1.participants r2.participants) &&
-    (String.(=) r1.id r2.id)
+    (String.(=) r1.id r2.id) &&
+    (Bool.(=) r1.is_dir r2.is_dir)
+  let create (id_s: string) (is_dir_s: bool) = {id = id_s; participants = String_Map.empty; is_dir = is_dir_s}
   let get_id (a: t) = a.id
   let _add_edge_to_node (a: t) (node_id: string) (edge: Edge.t) = 
     match String_Map.find a.participants node_id with
-    | Some(v) -> let p' = String_Map.remove a.participants node_id in {id = a.id; participants = String_Map.add_exn p' ~key:node_id ~data:(edge::v)} (* Cons if exists *)
-    | None -> {id = a.id; participants = String_Map.add_exn a.participants ~key:node_id ~data:[edge]}
+    | Some(v) -> let p' = String_Map.remove a.participants node_id in {id = a.id; participants = String_Map.add_exn p' ~key:node_id ~data:(edge::v); is_dir = a.is_dir} (* Cons if exists *)
+    | None -> {id = a.id; participants = String_Map.add_exn a.participants ~key:node_id ~data:[edge]; is_dir = a.is_dir}
 
   let add_edge_obj (a: t) (edge: Edge.t) = 
     (* Define fold accumulator *)
@@ -87,13 +88,13 @@ module Relation = struct
     ID for the relation is the same as the node.
     Can change this so we can target specific edges
   *)
-  let add_edge (a: t) (id: string) (nodes: string list) (is_dir: bool)=
-    let e = Edge.create id nodes is_dir in
+  let add_edge (a: t) (id: string) (nodes: string list)=
+    let e = Edge.create id nodes in
     add_edge_obj a e
 
   let get_neighbors (a: t) (node_id: string) =
     match String_Map.find a.participants node_id with
-    | Some v -> List.map v ~f:(Edge.get_neighbors node_id) |> List.concat
+    | Some v -> List.map v ~f:(Edge.get_neighbors node_id a.is_dir) |> List.concat
     | None -> []
 
 end
@@ -143,22 +144,30 @@ module Database = struct
   let get_nodes (db: t) = List.map (String_Map.keys db.nodes) ~f:(get_node_exn db)
   let get_node_ids (db: t) = String_Map.keys db.nodes
 
-  (* Add a relation + edge to the database*)
-  let add_relation (db: t) (rel_id: string) (nodes: string list) (is_dir: bool) = 
+
+  let create_relation (db: t) (rel_id: string) (is_dir: bool) = 
+    if has_relation db rel_id then 
+      raise @@ Exception "Relation ID already exists"
+    else 
+      let r = Relation.create rel_id is_dir in
+      add_relation_obj db rel_id r
+
+  
+  (* Add a edge to the database*)
+  let add_edge (db: t) (rel_id: string) (nodes: string list) = 
     if has_relation db rel_id then 
       let r = get_relation_exn db rel_id in
-      let r' = Relation.add_edge r rel_id nodes is_dir in
+      let r' = Relation.add_edge r rel_id nodes in
       let db' = add_relation_obj db rel_id r' in
       (* Assumes the bi-directed relations are already created *)
       if has_relation_pair db rel_id then
         let r2 = get_relation_exn db (String_Map.find_exn db.paired_relation rel_id) in
-        let r2' = Relation.add_edge r2 rel_id (List.rev nodes) is_dir in
+        let r2' = Relation.add_edge r2 rel_id (List.rev nodes) in
         add_relation_obj db' (String_Map.find_exn db.paired_relation rel_id) r2'
       else
         db'
     else 
-      let r = Relation.add_edge Relation.empty rel_id nodes is_dir in
-      add_relation_obj db rel_id r
+      raise @@ Exception "Relation ID does not exist"
 
   (* Pair two relation names *)
   let pair_relations (db: t) (rel_id_fwd: string) (rel_id_bkw: string) = 
@@ -200,17 +209,20 @@ module Broql = struct
     let n = Node.set_from_json Node.empty json in
       a.db <- Database.add_node_exn a.db id n
 
-  let add_relation (a: t) (rel_id: string) (nodes: string list) (is_dir: bool) = 
-    if not @@ _exist_nodes a.db nodes then raise @@ Exception "Nodes do not exist"
-    else 
-      let db' = Database.add_relation a.db rel_id nodes is_dir in a.db <- db'
+  let create_relation (a: t) (rel_id: string) (is_dir: bool) = 
+    let db' = Database.create_relation a.db rel_id is_dir in a.db <- db'
 
   (* Add a bi-labeled relation + edge to the database *)
-  let add_twonamed_relation (a: t) (rel_id_fwd: string) (rel_id_bkw: string) = 
-    let db' = Database.add_relation_obj a.db rel_id_fwd Relation.empty in
-    let db' = Database.add_relation_obj db' rel_id_bkw Relation.empty in
+  let create_relation_pair (a: t) (rel_id_fwd: string) (rel_id_bkw: string) = 
+    let db' = Database.create_relation a.db rel_id_fwd true in
+    let db' = Database.create_relation db' rel_id_bkw true in
     let db' = Database.pair_relations db' rel_id_fwd rel_id_bkw in
     a.db <- db'
+
+  let add_edge (a: t) (rel_id: string) (nodes: string list) = 
+    if not @@ _exist_nodes a.db nodes then raise @@ Exception "Nodes do not exist"
+    else 
+      let db' = Database.add_edge a.db rel_id nodes in a.db <- db'
 
   let get_attr (a: t) ?(name) (node_id: string) = 
     let n_opt = Database.get_node (a.db) node_id in
@@ -243,8 +255,9 @@ module Broql = struct
       who' a rel_id (String_Set.to_list new_set) (times - 1)
 
 
-  let who (a: t) (rel_id: string) ?(recurse = false) ?(times = 1) (node_id: string) = 
-    if not recurse then Database.neighbors a.db rel_id node_id
+  let who (a: t) (rel_id: string) (times: int) (node_id: string) = 
+    if times=0 then [node_id] 
+    else if times=1 then Database.neighbors a.db rel_id node_id
     else who' a rel_id [node_id] times
 
   let save (a: t) (path: string) = 

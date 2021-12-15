@@ -27,7 +27,7 @@ module Node : sig
 end
 
 module Edge : sig
-    type t = {id: string; node_ids: string list; is_dir: bool}
+    type t = {id: string; node_ids: string list}
     (* Get an empty edge *)
     val empty : t
     (* Tell if two edges are equal *)
@@ -35,7 +35,7 @@ module Edge : sig
     (* Get the identifier for an edge *)
     val get_id : t -> string
     (* Create an edge from its identifier and the node ids that exist. Will not check if nodes are valid (done at higher level) *)
-    val create : string -> string list -> bool -> t
+    val create : string -> string list -> t
     (* Gets the nodes in the edge *)
     val get_nodes : t -> string list
     (* Sets the nodes in the edge, replacing the existing nodes *)
@@ -45,11 +45,11 @@ module Edge : sig
     is the first node and the second is where the edge points to. If not directed, will return the rest of the list, 
     not including the original edge
     *)
-    val get_neighbors : string -> t -> string list
+    val get_neighbors : string -> bool -> t -> string list
 end
 
 module Relation : sig
-    type t = {id: string; participants: (Edge.t list) String_Map.t}
+    type t = {id: string; participants: (Edge.t list) String_Map.t; is_dir: bool}
     (* Returns an empty relation *)
     val empty : t
     (* Determines if two relations are equal *)
@@ -59,7 +59,7 @@ module Relation : sig
     (* Add an edge (object) to the relation *)
     val add_edge_obj : t -> Edge.t -> t
     (* Add an edge (using what it takes to create an edge) to the relation *)
-    val add_edge : t -> string -> string list -> bool -> t
+    val add_edge : t -> string -> string list -> t
     (* Get the neighbors for a node, using all the available edges *)
     val get_neighbors : t -> string -> string list
 end
@@ -95,7 +95,9 @@ module Database : sig
     (* Get a list of the node ids in the database *)
     val get_node_ids : t -> string list
     (* Add a relation to the database using what is needed to create a relation *)
-    val add_relation : t -> string -> string list -> bool -> t
+    val create_relation : t -> string -> bool -> t 
+    (* Add an edge to the database, passing a relation id and the string of nodes involved *)
+    val add_edge : t -> string -> string list -> t
     (* Associate a pair between two relations *)
     val pair_relations : t -> string -> string -> t
     (* Get the neighbors of a node across a relation *)
@@ -126,13 +128,18 @@ module Broql : sig
     Add a relation for a set of nodes, and denote whether 
     it is directed or not 
     *)
-    val add_relation : t -> string -> string list -> bool -> unit
+    val create_relation : t -> string -> bool -> unit
     (*
     Add two relations, by name, that are automatically inverses of each other.
     Meaning that if at any time an edge is added of one's name, then the 
     reverse edge is added under the other's name
     *)
-    val add_twonamed_relation : t -> string -> string -> unit
+    val create_relation_pair : t -> string -> string -> unit
+    (*
+    Add an edge to an existing relation and specify the nodes that
+    particiate in that relation
+    *)
+    val add_edge : t -> string -> string list -> unit
     (* 
     Get the named attribute of a node if it exists. If name is not specified
     then return the to-stirng / pretty print of its attributes
@@ -149,7 +156,7 @@ module Broql : sig
     recurse is specified, then recursively query the number of times mentioned.
     Returns a list of all nodes that are connected
     *)
-    val who : t -> string -> ?recurse:bool -> ?times:int -> string -> string list
+    val who : t -> string -> int -> string -> string list
     (* Save the state of broql to a out file *)
     val save : t -> string -> unit
     (* Loat the state of broql from an infile *)

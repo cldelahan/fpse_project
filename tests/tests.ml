@@ -4,6 +4,8 @@
   Date: 12/6/21
 *)
 
+[@@@ocaml.warning "-32"]
+
 open Core;;
 open OUnit2;;
 open Graph;;
@@ -70,12 +72,14 @@ let d2 = Database.add_node_exn d2 "n3" n3;;
 let d2 = Database.add_node_exn d2 "n4" n4;;
 let d2 = Database.add_node_exn d2 "n5" n4;;
 
+let d3 = Database.create_relation d2 "friends" false;;
+let d3 = Database.create_relation d3 "loves" true;;
 
-let d3 = Database.add_relation d2 "friends" ["n";"n2"] false;;
-let d3 = Database.add_relation d3 "loves" ["n2"; "n"] true;;
-let d3 = Database.add_relation d3 "loves" ["n3"; "n"] true;;
-let d3 = Database.add_relation d3 "loves" ["n3"; "n2"] true;;
-let d3 = Database.add_relation d3 "loves" ["n5"; "n3"] true;;
+let d3 = Database.add_edge d3 "friends" ["n";"n2"];;
+let d3 = Database.add_edge d3 "loves" ["n2"; "n"];;
+let d3 = Database.add_edge d3 "loves" ["n3"; "n"];;
+let d3 = Database.add_edge d3 "loves" ["n3"; "n2"];;
+let d3 = Database.add_edge d3 "loves" ["n5"; "n3"];;
 
 
 let opt_equal ~f o1_o o2_o = 
@@ -124,9 +128,9 @@ let test_broql_attr _ =
   assert_equal None @@ Broql.get_attr b ~name:"Id" "node2";;
 ;;
 
-Broql.add_twonamed_relation b "manages" "is_managed_by";;
-Broql.add_relation b "roomates" ["node1"; "node2"; "node4"] false;;
-
+Broql.create_relation_pair b "manages" "is_managed_by";;
+Broql.create_relation b "roomates" false;;
+Broql.add_edge b "roomates" ["node1"; "node2"; "node4"];;
 
 (* Create BROQL with some relations *)
 let test_broql_paired_relations _ = 
@@ -135,11 +139,11 @@ let test_broql_paired_relations _ =
   assert_equal true @@ Database.has_relation b.db "is_managed_by";;
 ;;
 
-
-Broql.add_relation b "manages" ["node1"; "node2"] true;; (* node1 manages node2 *)
-Broql.add_relation b "is_managed_by" ["node2"; "node3"] true;; (* node2 is managed by node3*)
-Broql.add_relation b "loves" ["node3"; "node2"] true;; (* node3 loves node2 *)
-Broql.add_relation b "loves" ["node2"; "node1"] true;; (* node2 loves node1 *)
+Broql.add_edge b "manages" ["node1"; "node2"];; (* node1 manages node2 *)
+Broql.add_edge b "is_managed_by" ["node2"; "node3"];; (* node2 is managed by node3*)
+Broql.create_relation b "loves" true;;
+Broql.add_edge b "loves" ["node3"; "node2"];; (* node3 loves node2 *)
+Broql.add_edge b "loves" ["node2"; "node1"];; (* node2 loves node1 *)
 
 (* Assert that creating a relation that is paired creates the pair *)
 let test_broql_paired_relations_inserts _ = 
@@ -153,11 +157,11 @@ let test_broql_paired_relations_inserts _ =
 
 
 let test_broql_who_rec _ = 
-  assert_equal ["node2"] @@ (Broql.who b "manages" "node1");;
-  assert_equal ["node3"; "node1"] @@ (Broql.who b "is_managed_by" "node2");;
-  assert_equal ["node1"] @@ (Broql.who b "loves" ~recurse:true ~times:2 "node3");;
-  assert_equal ["node2"] @@ (Broql.who b "loves" ~recurse:true ~times:1 "node3");;
-  assert_equal ["node1"] @@ (Broql.who b "loves" ~recurse:true ~times:1 "node2");;
+  assert_equal ["node2"] @@ (Broql.who b "manages" 1 "node1");;
+  assert_equal ["node3"; "node1"] @@ (Broql.who b "is_managed_by" 1 "node2");;
+  assert_equal ["node1"] @@ (Broql.who b "loves" 2 "node3");;
+  assert_equal ["node2"] @@ (Broql.who b "loves" 1 "node3");;
+  assert_equal ["node1"] @@ (Broql.who b "loves" 1 "node2");;
   (* assert_equal true @@ true;; *)
 ;;
 
