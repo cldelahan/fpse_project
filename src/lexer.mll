@@ -25,6 +25,9 @@ rule token = parse
 | "LOAD"                { LOAD }
 | "SAVE"                { SAVE }
 | "ATTR"                { ATTR }
+| "SHOW"                { SHOW }
+| "NODES"               { NODES }
+| "RELATIONS"           { RELATIONS }
 | "="                   { EQUAL }
 | ","                   { COMMA }
 | ";"                   { EOEX }

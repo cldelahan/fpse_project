@@ -16,6 +16,7 @@ let rec pp_expr fmt =
   | RelationPair(Ident x, Ident y) -> ff fmt "%s %s" x y
   | Object x -> ff fmt "%s" x
   | NodeList l -> ff fmt "%a" pp_expr_list l
+  | RelationList l -> ff fmt "%a" pp_expr_list l
 
   | CreateNode (Ident x, s) -> ff fmt "NODE %s = %s" x s
   | CreateRelation (Ident x, Some (Ident y), _) ->
@@ -31,6 +32,9 @@ let rec pp_expr fmt =
   | Who (e1, e2, num_rec) -> 
     ff fmt "WHO %a %a %s" pp_expr e1 pp_expr e2 (if num_rec >= 1 then ("REC" ^ string_of_int num_rec) else "")
   | Size l -> ff fmt "SIZE %a" pp_expr_list l
+
+  | ShowNodes -> ff fmt "SHOW NODES"
+  | ShowRelations -> ff fmt "SHOW RELATIONS"
 
   | Load s -> ff fmt "LOAD %s" s
   | Save s -> ff fmt "SAVE %s" s

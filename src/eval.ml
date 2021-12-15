@@ -16,6 +16,7 @@ let rec eval (exp: expr) : expr =
   | RelationPair _ -> exp
   | Object _ -> exp
   | NodeList _ -> exp
+  | RelationList _ -> exp
 
   | CreateNode (i, json) -> (match i with Ident node_name ->
       Broql.add_node !instance node_name ~json;
@@ -57,6 +58,9 @@ let rec eval (exp: expr) : expr =
     )
   | Size l -> 
     let node_list = List.map l ~f:(fun x -> eval x) in Msg ("Size: " ^ (string_of_int @@ List.length node_list))
+
+  | ShowNodes -> let l = Broql.show_nodes !instance in NodeList (List.map l ~f:(fun x -> Node (Ident x)))
+  | ShowRelations -> let l = Broql.show_relations !instance in RelationList (List.map l ~f:(fun x -> Relation (Ident x)))
 
   | Load s -> instance := Broql.load s; Msg "Database Loaded"
   | Save s -> Broql.save !instance s; Msg "Database Saved"
