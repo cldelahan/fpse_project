@@ -58,6 +58,9 @@ module Node = struct
   (* Get a specific attribute by key *)
   let get_attr (a: t) (k: string) : string option = 
     String_Map.find a k
+  let matches ~(query: t) (a: t) = 
+    let acc s v = s && (Option.equal String.equal (String_Map.find query v) (String_Map.find a v)) in
+    List.fold (String_Map.keys query) ~init:true ~f:acc 
   (* Crudely parses json string for key-value attributes *)
   (*
   let rec set_from_json (a: t) (json: string) =
@@ -188,7 +191,7 @@ module Database = struct
   let get_node_exn (db: t) (id: string) = String_Map.find_exn db.nodes id
   let get_relation (db: t) (id: string) = String_Map.find db.relations id
   let get_relation_exn (db: t) (id: string) = String_Map.find_exn db.relations id
-  let get_nodes (db: t) = List.map (String_Map.keys db.nodes) ~f:(get_node db)
+  let get_nodes (db: t) = List.map (String_Map.keys db.nodes) ~f:(get_node_exn db)
   let get_node_ids (db: t) = String_Map.keys db.nodes
 
   (* Add a relation + edge to the database*)
@@ -215,22 +218,17 @@ module Database = struct
     let p = String_Map.add_exn p ~key:rel_id_bkw ~data:rel_id_fwd in
     {relations = db.relations; nodes = db.nodes; paired_relation = p}
 
-    (* Add a bi-labeled relation + edge to the database *)
-    (*
-    let add_twonamed_relation (db: t) (rel_id_fwd: string) (rel_id_bkw: string) = 
-      let db' = _add_relation db rel_id_fwd Relation.empty in
-      let db'' = _add_relation db' rel_id_bkw Relation.empty in 
-      let paired' = String_Map.add_exn db''.paired_relation ~key:rel_id_fwd ~data:rel_id_bkw in
-      let paired'' = String_Map.add_exn paired' ~key:rel_id_bkw ~data:rel_id_fwd in
-      {relations = db''.relations; nodes = db''.nodes; paired_relation = paired''}
-    *)
-
-
   (* Get all related nodes to n *)
   (*  let neighbors (db: t) (rel_id: string) (node_id: string) *)
   let neighbors (db: t) (rel_id: string) (node_id: string) = 
     let r = get_relation_exn db rel_id in
     Relation.get_neighbors r node_id
+
+  (* Query a node based off the result *)
+  let query (db: t) (query_node: Node.t) = 
+    let node_ids = get_node_ids db in 
+    List.filter node_ids ~f:(fun v -> Node.matches ~query:(query_node) (get_node_exn db v))
+
   
 end
 
@@ -273,12 +271,15 @@ module Broql = struct
       | (Some (n), None) -> Some(Node.to_string n)
       | (None, _) -> None
 
+  let search (a: t) (json: string) = 
+    let query_node = Node.set_from_json Node.empty json in
+    Database.query a.db query_node
+
   let show_nodes (a: t) = 
     Database.get_node_ids a.db
 
   let show_relations (a: t) = 
     String_Map.keys a.db.relations
-
 
   let rec who' (a: t) (rel_id: string) (node_ids: string list) (times: int) = 
     if times < 1 then node_ids
@@ -290,7 +291,7 @@ module Broql = struct
       let insert s v = String_Set.add s v in
       (* Get all neighbors *)
       let new_set = List.map node_ids ~f:expl |> List.concat |> List.fold ~init:neighbors ~f:insert in
-      (* Recuse *)
+      (* Recurse *)
       who' a rel_id (String_Set.to_list new_set) (times - 1)
 
 

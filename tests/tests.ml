@@ -149,7 +149,7 @@ let test_broql_paired_relations_inserts _ =
 ;;
 
 
-List.map (Broql.who b "loves" ~recurse:true ~times:2 "node3") ~f:(fun x-> Printf.printf "%s\n" x);;
+(* List.map (Broql.who b "loves" ~recurse:true ~times:2 "node3") ~f:(fun x-> Printf.printf "%s\n" x);; *)
 
 
 let test_broql_who_rec _ = 
@@ -158,9 +158,17 @@ let test_broql_who_rec _ =
   assert_equal ["node1"] @@ (Broql.who b "loves" ~recurse:true ~times:2 "node3");;
   assert_equal ["node2"] @@ (Broql.who b "loves" ~recurse:true ~times:1 "node3");;
   assert_equal ["node1"] @@ (Broql.who b "loves" ~recurse:true ~times:1 "node2");;
-
   (* assert_equal true @@ true;; *)
 ;;
+
+
+let test_broql_search _ = 
+  assert_equal ["node1"] @@ (Broql.search b "{name: \"vini\"}");;
+  assert_equal ["node4"] @@ (Broql.search b "{height: \"tall\"}");;
+  assert_equal ["node3"; "node4"] @@ (Broql.search b "{id: \"11\"}");;
+  assert_equal ["node1"; "node2"; "node3"; "node4"] @@ (Broql.search b "{}");;
+;;
+
 
 (* Write and read from file *)
 let path = "out.broql";;
@@ -186,6 +194,7 @@ let broql_tests =
     "Test Broql Attributes" >:: test_broql_attr;
     "Test Broql Paired Relations" >:: test_broql_paired_relations;
     "Test Broql Paired Relations Inserts" >:: test_broql_paired_relations_inserts;
+    "Test Broql Search" >:: test_broql_search;
     "Test Broql File IO" >:: test_broql_fileio;
     "Test Broql WHO Rec" >:: test_broql_who_rec;
     "Test Broql Misc" >:: test_broql_misc;
