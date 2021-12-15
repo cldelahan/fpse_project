@@ -22,6 +22,8 @@
 %token RELATIONS
 %token SEARCH
 %token EQUAL
+%token QUIT
+
 %token COMMA
 %token LPAREN
 %token RPAREN
@@ -59,6 +61,7 @@ expr:
     | SHOW RELATIONS { ShowRelations }
     | LOAD STRING { Load $2 }
     | SAVE STRING { Save $2 }
+    | QUIT { exit 0 }
 ;
 
 node_usage:

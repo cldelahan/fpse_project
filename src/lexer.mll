@@ -29,6 +29,7 @@ rule token = parse
 | "NODES"               { NODES }
 | "RELATIONS"           { RELATIONS }
 | "SEARCH"              { SEARCH }
+| "QUIT"                { QUIT }
 | "="                   { EQUAL }
 | ","                   { COMMA }
 | ";"                   { EOEX }
