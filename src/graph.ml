@@ -3,7 +3,6 @@
   Author: Conner Delahanty
   Date: 12/1/21
 *)
-(* [@@@ocaml.warning "-33"] *)
 
 open Core
 
@@ -11,63 +10,20 @@ exception Exception of string
 module String_Map = Map.Make(String)
 module String_Set = Set.Make(String)
 
-(* Lib contains a collection of helper library functions *)
-module Lib = struct
-  (* 
-    "Explode" a string to a character list 
-    Implementation provided by Pierre Weis
-    https://caml.inria.fr/pub/old_caml_site/Examples/oc/basics/explode.ml
-  *)
-  let explode s =
-    let rec expl i l =
-      if i < 0 then l else
-      expl (i - 1) (s.[i] :: l) in
-    expl (String.length s - 1) [];;
-
-  (* 
-    "Implode" a character list back to a string 
-  *)
-  let implode l = 
-    let acc str c = 
-      String.concat [str; Char.to_string c] in
-    List.fold l ~init:"" ~f:acc
-
-  (*
-      Flatten a list of lists
-  *)
-  let flatten (a: 'a list list) = 
-    let rec flatten' (res: 'a list) (arr: 'a list list) = 
-      match arr with 
-      | [] -> res
-      | v_l :: r_l -> (
-        match v_l with 
-          | v :: r -> flatten' (v::res) (r :: r_l)
-          | _ -> flatten' res r_l) in
-    List.rev @@ flatten' [] a
-
-end
-
 module Node = struct
-  type t = (String.t) String_Map.t
+  type t = (String.t) String_Map.t [@@deriving sexp]
   let empty = String_Map.empty
   let equal (n1: t) (n2: t) = String_Map.equal String.equal n1 n2
   (* Add a specific key-value attribute *)
-  (* To-do -- need to check for duplicates *)
-  let add_attr (a: t) (k: string) (v: string) =
-    String_Map.add_exn a ~key:k ~data:v 
-  (* Get a specific attribute by key *)
   let get_attr (a: t) (k: string) : string option = 
     String_Map.find a k
+  let add_attr (a: t) (k: string) (v: string) =
+    match get_attr a k with
+    | Some (v) -> let a' = String_Map.remove a k in String_Map.add_exn a' ~key:k ~data:v
+    | None -> String_Map.add_exn a ~key:k ~data:v 
   let matches ~(query: t) (a: t) = 
     let acc s v = s && (Option.equal String.equal (String_Map.find query v) (String_Map.find a v)) in
     List.fold (String_Map.keys query) ~init:true ~f:acc 
-  (* Crudely parses json string for key-value attributes *)
-  (*
-  let rec set_from_json (a: t) (json: string) =
-    match Lib.explode json with 
-    | k::':'::v::','::rest -> set_from_json (add_attr a (Lib.implode k) (Lib.implode v)) rest
-    | _ -> a
-  *)
   let set_from_json (a: t) (json: string) =
     let acc a pair = 
       match pair with
@@ -86,13 +42,6 @@ module Node = struct
                       else acc rest (String.concat [s;" "; k; ": "; String_Map.find_exn a k])
       | [] -> s in
     acc (String_Map.keys a) ""
-
-  let sexp_of_t (a: t) = 
-    String_Map.sexp_of_t String.sexp_of_t a
-
-  let t_of_sexp (sexp: Sexp.t) = 
-    String_Map.t_of_sexp String.t_of_sexp sexp
-
 end
 
 
@@ -129,7 +78,7 @@ module Relation = struct
     | Some(v) -> let p' = String_Map.remove a.participants node_id in {id = a.id; participants = String_Map.add_exn p' ~key:node_id ~data:(edge::v)} (* Cons if exists *)
     | None -> {id = a.id; participants = String_Map.add_exn a.participants ~key:node_id ~data:[edge]}
 
-  let add_edge (a: t) (edge: Edge.t) = 
+  let add_edge_obj (a: t) (edge: Edge.t) = 
     (* Define fold accumulator *)
     let acc rel node = _add_edge_to_node rel node edge in
     (* Set map from node to edge *)
@@ -140,7 +89,7 @@ module Relation = struct
   *)
   let add_edge (a: t) (id: string) (nodes: string list) (is_dir: bool)=
     let e = Edge.create id nodes is_dir in
-    add_edge a e
+    add_edge_obj a e
 
   let get_neighbors (a: t) (node_id: string) =
     match String_Map.find a.participants node_id with
@@ -178,7 +127,7 @@ module Database = struct
     | None -> false
 
   (* Add a relation to the database without exception *)
-  let add_relation' (db: t) (id: string) (relation: Relation.t) = 
+  let add_relation_obj (db: t) (id: string) (relation: Relation.t) = 
     if has_relation db id then 
       let m = String_Map.remove db.relations id in
       let relations' = String_Map.add_exn m ~key:id ~data:relation in
@@ -199,17 +148,17 @@ module Database = struct
     if has_relation db rel_id then 
       let r = get_relation_exn db rel_id in
       let r' = Relation.add_edge r rel_id nodes is_dir in
-      let db' = add_relation' db rel_id r' in
+      let db' = add_relation_obj db rel_id r' in
       (* Assumes the bi-directed relations are already created *)
       if has_relation_pair db rel_id then
         let r2 = get_relation_exn db (String_Map.find_exn db.paired_relation rel_id) in
         let r2' = Relation.add_edge r2 rel_id (List.rev nodes) is_dir in
-        add_relation' db' (String_Map.find_exn db.paired_relation rel_id) r2'
+        add_relation_obj db' (String_Map.find_exn db.paired_relation rel_id) r2'
       else
         db'
     else 
       let r = Relation.add_edge Relation.empty rel_id nodes is_dir in
-      add_relation' db rel_id r
+      add_relation_obj db rel_id r
 
   (* Pair two relation names *)
   let pair_relations (db: t) (rel_id_fwd: string) (rel_id_bkw: string) = 
@@ -224,16 +173,15 @@ module Database = struct
     let r = get_relation_exn db rel_id in
     Relation.get_neighbors r node_id
 
-  (* Query a node based off the result *)
+  (* Query a node based off a query node map *)
   let query (db: t) (query_node: Node.t) = 
     let node_ids = get_node_ids db in 
     List.filter node_ids ~f:(fun v -> Node.matches ~query:(query_node) (get_node_exn db v))
 
-  
 end
 
 module Broql = struct 
-  (* TODO: Figure out best way to interact *)
+  (* Underling BROQL interface *)
   type t = {mutable n_queries: int; 
             mutable db: Database.t; 
             mutable out_path: string} [@@deriving sexp]
@@ -259,8 +207,8 @@ module Broql = struct
 
   (* Add a bi-labeled relation + edge to the database *)
   let add_twonamed_relation (a: t) (rel_id_fwd: string) (rel_id_bkw: string) = 
-    let db' = Database.add_relation' a.db rel_id_fwd Relation.empty in
-    let db' = Database.add_relation' db' rel_id_bkw Relation.empty in
+    let db' = Database.add_relation_obj a.db rel_id_fwd Relation.empty in
+    let db' = Database.add_relation_obj db' rel_id_bkw Relation.empty in
     let db' = Database.pair_relations db' rel_id_fwd rel_id_bkw in
     a.db <- db'
 
@@ -315,5 +263,4 @@ module Broql = struct
     with _ -> 
       empty
 
-  (* Put broql operations here *)
 end

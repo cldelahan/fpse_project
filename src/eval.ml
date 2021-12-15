@@ -1,5 +1,6 @@
 open Core;;
 open Ast;;
+include Graph;;
 open Graph;;
 
 
