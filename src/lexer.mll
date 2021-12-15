@@ -30,6 +30,7 @@ rule token = parse
 | "RELATIONS"           { RELATIONS }
 | "SEARCH"              { SEARCH }
 | "QUIT"                { QUIT }
+| "BROQLI" | "BROQL"    { BROQL }
 | "="                   { EQUAL }
 | ","                   { COMMA }
 | ";"                   { EOEX }
