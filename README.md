@@ -2,6 +2,8 @@
 
 Project structure inspired by the FbDK distribution from Prof. Smith's Principles of Programming Languages class.
 
+# TODO: mention that coverage is low for lexer and parser because they're auto generated
+
 Implemented for code checkpoint:
 1. Parsing functionality
 - Built lexer and parser for a few of the basic functionalities: node creation, relation creation, `WHO` operator, `SIZE` operator

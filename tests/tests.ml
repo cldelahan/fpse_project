@@ -196,7 +196,7 @@ let broql_tests =
 
 open Parser;;
 open Ast;;
-let test_lexer _ = 
+let test_lexer_valid _ = 
   let obtained = debug_lex "NODE n1 = {name: \"Vini\", id: \"45\"};" in
   let expected = [NODE; IDENT "n1"; EQUAL; STRING "{name: \"Vini\", id: \"45\"}"; EOEX] in
   assert_equal expected obtained;
@@ -217,11 +217,24 @@ let test_lexer _ =
   assert_equal expected obtained;
   let obtained = debug_lex "ATTR name n2;" in
   let expected = [ATTR; IDENT "name"; IDENT "n2"; EOEX] in
+  assert_equal expected obtained;
+  let obtained = debug_lex "SIZE (SHOW NODES);" in
+  let expected = [SIZE; LPAREN; SHOW; NODES; RPAREN; EOEX] in
+  assert_equal expected obtained;
+  let obtained = debug_lex "QUIT;" in
+  let expected = [QUIT; EOEX] in
+  assert_equal expected obtained;
+  let obtained = debug_lex "BROQL;" in
+  let expected = [BROQL; EOEX] in
   assert_equal expected obtained
+
+let test_lexer_invalid _ =
+  assert_raises (Failure "lexing: empty token") @@ fun () -> debug_lex "NoDe n1;"
 
 let lexing_tests = 
   "Lexing Tests" >: test_list [
-    "Lexer"    >:: test_lexer
+    "Lexer Valid"    >:: test_lexer_valid;
+    "Lexer Invalid"  >:: test_lexer_invalid
   ]
 
 (*
@@ -249,7 +262,8 @@ let test_parser_who _ =
   assert_equal (Who (Relation (Ident "is_loved"), Node (Ident "n2"), 3)) @@ parse "WHO is_loved BY n2 REC 3;"
 
 let test_parser_attr _ =
-  assert_equal (Attr (Some (Ident "name"), Node (Ident "n1"))) @@ parse "ATTR name n1;"
+  assert_equal (Attr (Some (Ident "name"), Node (Ident "n1"))) @@ parse "ATTR name n1;";
+  assert_equal (Attr (Some (Ident "name"), Node (Ident "n1"))) @@ parse "ATTR name OF n1;" (* Optional OF keyword *)
 
 let test_parser_size _ =
   assert_equal (Size (NodeList [Node (Ident "n1"); Node (Ident "n2")])) @@ parse "SIZE n1, n2;"
@@ -269,6 +283,9 @@ let test_parser_load _ =
 let test_parser_save _ =
   assert_equal (Save "test.broql") @@ parse "SAVE test.broql;"
 
+let test_parser_errors _ =
+  assert_raises Error (fun () -> parse "RELATION RELATION");
+  assert_raises Error (fun () -> parse "ATTR name n1 n2")
 
 let parsing_tests =
   "Parsing Tests" >: test_list [
@@ -283,7 +300,8 @@ let parsing_tests =
     "SHOW NODES"      >:: test_parser_show_nodes;
     "SHOW RELATIONS"  >:: test_parser_show_relations;
     "LOAD"            >:: test_parser_load;
-    "SAVE"            >:: test_parser_save
+    "SAVE"            >:: test_parser_save;
+    "Error cases"     >:: test_parser_errors
   ]
 
 let series =
