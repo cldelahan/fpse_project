@@ -24,6 +24,7 @@
 %token RELATION
 %token WHO
 %token BY
+%token OF
 %token FOR
 %token SIZE
 %token REC
@@ -68,6 +69,7 @@ expr:
     | WHO relation_usage node_usage REC INT { Who($2, $3, $5) }
     | WHO relation_usage BY node_usage REC INT { Who($2, $4, $6) } (* Allow BY as syntactic sugar *)
     | ATTR ident_decl node_usage { Attr(Some $2, $3) }
+    | ATTR ident_decl OF node_usage { Attr(Some $2, $4) }
     | SIZE node_list { Size $2 }
     | SIZE LPAREN expr RPAREN { Size $3 }
     | SEARCH STRING { Search(Object $2) }

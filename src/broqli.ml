@@ -82,23 +82,23 @@ let operations = [
   };
   {
     name = "ATTR";
-    description = "Get a specific attribute from a node.";
-    example = "ATTR name n1;"
+    description = "Get a specific attribute from a node. Keyword OF is optional.";
+    example = "ATTR name n1;\nATTR name OF n1;"
   };
   {
     name = "SEARCH";
-    description = "Get all nodes that meet a certain search criterion.";
-    example = "SEARCH {name: \"Conner\"};"
+    description = "Get all nodes that meet a certain search criterion. Can take other expressions as argument by using parenthesis.";
+    example = "SEARCH {name: \"Conner\"};\n SEARCH (NODE n1);"
   };
   {
     name = "WHO";
-    description = "Get nodes that satisfy a certain relation for a node. Can be used to traverse relations recursively. Keyword BY is optional for readability.";
+    description = "Get nodes that satisfy a certain relation for a node. Can be used to traverse relations recursively. Keyword BY is optional for readability. ";
     example = "WHO roommates n1;\nWHO loves n3;\nWHO is_loved BY n2 REC 2;"
   };
   {
     name = "SIZE";
-    description = "Get size of a list of nodes.";
-    example = "SIZE WHO roommates FOR n1;"
+    description = "Get size of a list of nodes or relations. Can take other expressions as argument by using parenthesis.";
+    example = "SIZE (WHO roommates n1);\n SIZE (SHOW RELATIONS);"
   };
   {
     name = "SHOW NODES";
@@ -113,12 +113,17 @@ let operations = [
   {
     name = "LOAD";
     description = "Load a stored database file (.broql).";
-    example = "LOAD db.broql"
+    example = "LOAD db.broql;"
   };
   {
     name = "SAVE";
     description = "Save the state of the database to a file (.broql).";
-    example = "SAVE db.broql"
+    example = "SAVE db.broql;"
+  };
+  {
+    name = "BROQL or BROQLI";
+    description = "Try it out!";
+    example = "BROQL;\nBROQLI;"
   }
 ]
 

@@ -7,9 +7,9 @@ maintainer: ["cdelaha1@jhu.edu" "vlepca1@jhu.edu"]
 authors: ["Conner Delahanty" "Vinicius Lepca"]
 depends: [
   "dune" {>= "2.9"}
-  "ounit2" {> "2.2.4"}
-  "core" {> "0.14.1"}
-  "menhir" {> "2.1"}
+  "ounit2" {>= "2.2.4"}
+  "core" {>= "0.14.1"}
+  "menhir" {>= "2.1"}
   "odoc" {with-doc}
 ]
 build: [
