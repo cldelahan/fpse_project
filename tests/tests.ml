@@ -304,6 +304,88 @@ let parsing_tests =
     "Error cases"     >:: test_parser_errors
   ]
 
+(*
+  Eval Tests
+*)
+let test_eval_simple_commands _ =
+  assert_equal "node1, node2, node3, node4" @@ peu "SHOW NODES";
+  assert_equal (NodeList [Node (Ident "node1"); Node (Ident "node2"); Node (Ident "node3"); Node (Ident "node4")]) @@ parse_eval "SHOW NODES";
+  assert_equal "is_managed_by, loves, manages, roomates" @@ peu "SHOW RELATIONS";
+  assert_equal (Msg "test") @@ eval (Msg "test");
+  assert_equal (Node (Ident "test")) @@ eval (Node (Ident "test"));
+  assert_equal (Relation (Ident "test")) @@ eval (Relation (Ident "test"));
+  assert_equal (RelationPair (Ident "test1", Ident "test2")) @@ eval (RelationPair (Ident "test1", Ident "test2"));
+  assert_equal (Object "{name: \"Vini\"}") @@ eval (Object "{name: \"Vini\"}");
+  assert_equal (NodeList [Node (Ident "test1"); Node (Ident "test2")]) @@ eval (NodeList [Node (Ident "test1"); Node (Ident "test2")]);
+  assert_equal (RelationList [Relation (Ident "test1"); Relation (Ident "test2")]) @@ eval (RelationList [Relation (Ident "test1"); Relation (Ident "test2")])
+
+let test_eval_create_node _ =
+  (* Check that node is indeed added *)
+  assert_equal "node1, node2, node3, node4" @@ peu "SHOW NODES";
+  assert_equal (Node (Ident "x")) @@ eval (CreateNode (Ident "x", "{name: \"Vini\"}"));
+  assert_equal (Node (Ident "y")) @@ eval (CreateNode (Ident "y", "{name: \"Conner\"}"));
+  assert_equal "node1, node2, node3, node4, x, y" @@ peu "SHOW NODES"
+
+let test_eval_create_relation _ =
+  (* Relation pair *)
+  assert_equal "is_managed_by, loves, manages, roomates" @@ peu "SHOW RELATIONS";
+  assert_equal (RelationPair (Ident "z1", Ident "z2")) @@ eval (CreateRelation (Ident "z1", Some (Ident "z2"), true));
+  assert_equal "is_managed_by, loves, manages, roomates, z1, z2" @@ peu "SHOW RELATIONS";
+
+  (* Single relation *)
+  assert_equal (Relation (Ident "z3")) @@ eval (CreateRelation (Ident "z3", None, true));
+  assert_equal "is_managed_by, loves, manages, roomates, z1, z2, z3" @@ peu "SHOW RELATIONS"
+
+let test_eval_create_edge_and_who _ =
+  let _ = peu "NODE x = {name: \"Vini\"}" in
+  let _ = peu "NODE y = {name: \"Conner\"}" in
+  assert_equal (Relation (Ident "roomates")) @@ eval (CreateEdge (Ident "roomates", NodeList [Node (Ident "x"); Node (Ident "y")]));
+  assert_equal "x" @@ peu "WHO roomates y";
+
+  (* Incorrect use of create edge *)
+  assert_raises Eval.incorrect_usage @@ (fun () -> eval (CreateEdge (Ident "roomates", NodeList [Relation (Ident "x"); Relation (Ident "y")])));
+  assert_raises Eval.incorrect_usage @@ (fun () -> eval (CreateEdge (Ident "roomates", RelationList [Relation (Ident "x"); Relation (Ident "y")])));
+
+  (* Incorrect use of who *)
+  assert_raises Eval.incorrect_usage @@ (fun () -> eval (Who (ShowNodes, ShowNodes, 1)))
+
+let test_eval_attr _ =
+  let _ = peu "NODE x = {name: \"Vini\"}" in
+  assert_equal (Msg "Vini") @@ eval (Attr (Some (Ident "name"), Node (Ident "x")));
+  assert_equal (Object "{name: \"Vini\"}") @@ eval (Attr (None, Node (Ident "x")));
+
+  (* Incorrect use *)
+  assert_raises Eval.missing_attribute @@ (fun () -> eval (Attr (Some (Ident "nonexistent"), Node (Ident "x"))));
+  assert_raises Eval.incorrect_usage @@ (fun () -> eval (Attr (Some (Ident "nonexistent"), Relation (Ident "x"))));
+  assert_raises Eval.node_not_found @@ (fun () -> eval (Attr (None, Node (Ident "z"))));
+  assert_raises Eval.incorrect_usage @@ (fun () -> eval (Attr (None, Relation (Ident "z"))))
+
+let test_eval_size _ =
+  assert_equal (Msg "Size: 2") @@ eval (Size (NodeList [Node (Ident "node1"); Node (Ident "node2")]));
+  assert_equal (Msg "Size: 1") @@ eval (Size (RelationList [Relation (Ident "roomates")]));
+  assert_raises Eval.incorrect_usage @@ (fun () -> eval (Size (Node (Ident "node1"))))
+
+let test_eval_search _ =
+  let _ = peu "NODE x = {test_field: \"Vini\"}" in
+  assert_equal (NodeList [Node (Ident "x")]) @@ eval (Search (Object "{test_field: \"Vini\"}"));
+  assert_raises Eval.incorrect_usage @@ (fun () -> eval (Search (Node (Ident "node1"))))
+
+let test_eval_save_and_load _ =
+  assert_equal (Msg "Database Saved") @@ eval (Save "tests.broql");
+  assert_equal (Msg "Database Loaded") @@ eval (Load "tests.broql")
+
+let eval_tests =
+  "Eval Tests" >: test_list [
+    "Eval Simple Commands"      >:: test_eval_simple_commands;
+    "Eval Create Node"          >:: test_eval_create_node;
+    "Eval Create Relation"      >:: test_eval_create_relation;
+    "Eval Create Edge and Who"  >:: test_eval_create_edge_and_who;
+    "Eval Attr"                 >:: test_eval_attr;
+    "Eval Size"                 >:: test_eval_size;
+    "Eval Search"               >:: test_eval_search;
+    "Eval Save and Load"        >:: test_eval_save_and_load
+  ]
+
 let series =
   "Broql Tests" >::: [
     instantiation_tests;
@@ -311,7 +393,8 @@ let series =
     database_tests;
     broql_tests;
     lexing_tests;
-    parsing_tests
+    parsing_tests;
+    eval_tests
   ]
 
 let () =

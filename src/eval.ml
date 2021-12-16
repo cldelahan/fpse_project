@@ -8,6 +8,8 @@ exception Exception of string
 let incorrect_usage = Exception "Incorrect usage"
 let missing_attribute = Exception "Missing attribute"
 
+let node_not_found = Exception "Node not found"
+
 let instance = ref Broql.empty
 
 let rec eval (exp: expr) : expr = 
@@ -59,7 +61,7 @@ let rec eval (exp: expr) : expr =
       | Node (Ident node_name) -> (
           match Broql.get_attr !instance node_name with
           | Some s -> Object s
-          | None -> Msg "Node not found"
+          | None -> raise node_not_found
         )
       | _ -> raise incorrect_usage
     )
